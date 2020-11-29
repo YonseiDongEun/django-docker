@@ -2,30 +2,55 @@ version: '3'
 services:
 
   db:
-    container_name: postgres
-    image: postgres
+    container_name: db
+    image: mariadb
     ports:
-      - "5432:5432"
-    env_file:
-      - .env
+      - "3400:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: db2020
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: db2020
+      MYSQL_USER: root
+      MYSQL_PASSWORD: db2020
     volumes:
-      - pgdata:/var/lib/postgresql/data/
+      - dbdata:/var/lib/mysql/data/
+      - ./:/app
 
   web:
     container_name: web
-    build: .
-    command: python manage.py runserver 0.0.0.0:8000
-    restart: always
-    ports:
-      - "8000:8000"
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: gunicorn django_docker.wsgi:application --bind 0.0.0.0:8000
+    environment:
+      DJANGO_SETTINGS_MODULE: django_docker.settings.prod
+    env_file:
+      - .env
     volumes:
-      - .:/app
+      - static:/home/app/web/static
+      - media:/home/app/web/media
+      - ./:/app
     depends_on:
       - db
+    expose:
+      - 8000
     entrypoint:
       - sh
-      - /app/config/docker/entrypoint.sh
+      - config/docker/entrypoint.sh
+
+  nginx:
+    container_name: nginx
+    build: ./config/nginx
+    volumes:
+      - static:/home/app/web/static
+      - media:/home/app/web/media
+    ports:
+      - "2323:2323"
+    depends_on:
+      - web
 
 volumes:
+  static:
+  media:
+  dbdata:
   app:
-  pgdata:

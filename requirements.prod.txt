@@ -5,7 +5,6 @@ django-excel==0.0.10
 django-object-actions==3.0.1
 gunicorn==20.0.4
 lml==0.1.0
-mysqlclient==2.0.1
 pyexcel==0.6.6
 pyexcel-io==0.6.4
 pyexcel-webio==0.1.4
