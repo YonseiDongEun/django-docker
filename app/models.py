@@ -6,7 +6,7 @@ from django.db.models import TextChoices
 class Evaluates(models.Model):
     uid = models.OneToOneField('UserEvaluator', models.CASCADE, db_column='UID',
                                primary_key=True)
-    pds = models.ForeignKey('ParsingDataSeq', models.DO_NOTHING, db_column='PDS_ID')
+    pds = models.ForeignKey('ParsingDataSeq', models.DO_NOTHING, db_column='PDS_ID', related_name='evaluates')
     status = models.CharField(db_column='STATUS', max_length=1, blank=True, null=True)
     p_np = models.IntegerField(db_column='P_NP')  # This field type is a guess.
     rating = models.IntegerField(db_column='RATING')
@@ -20,7 +20,7 @@ class Evaluates(models.Model):
 class IsAssignedTo(models.Model):
     uid = models.OneToOneField('UserEvaluator', models.CASCADE, db_column='UID',
                                primary_key=True)
-    pds = models.ForeignKey('ParsingDataSeq', models.DO_NOTHING, db_column='PDS_ID')
+    pds = models.ForeignKey('ParsingDataSeq', models.DO_NOTHING, db_column='PDS_ID', related_name='is_assigned_tos')
     due = models.DateField(db_column='DUE')
 
     class Meta:
@@ -48,6 +48,14 @@ class ParsingDataSeq(models.Model):
     class Meta:
         managed = False
         db_table = 'PARSING_DATA_SEQ'
+
+    @property
+    def table_name(self):
+        return self.requests_new.table_name
+
+    @property
+    def rating(self):
+        return getattr(self.evaluates.first(), 'rating', None)
 
 
 class ParticipatesIn(models.Model):
@@ -91,6 +99,12 @@ class RawDataTemplate(models.Model):
         managed = False
         db_table = 'RAW_DATA_TEMPLATE'
 
+    @staticmethod
+    def convert_csv_to_text(file):
+        rows = [','.join([str(x) for x in row]) for row in file.get_sheet().array]
+        return '\n'.join(rows)
+
+
 
 class RawFileMetadata(models.Model):
     table_name = models.CharField(db_column='TABLE_NAME', primary_key=True, max_length=50)
@@ -115,10 +129,11 @@ class RequestsNew(models.Model):
                                    db_column='TABLE_NAME')
     rdt = models.ForeignKey(RawDataTemplate, models.DO_NOTHING, db_column='RDT_ID')
     status = models.CharField(db_column='STATUS', max_length=1, choices=Status.choices)
-    pds = models.OneToOneField('ParsingDataSeq', on_delete=models.CASCADE)
+    pds = models.OneToOneField('ParsingDataSeq', db_column='PDS_ID', on_delete=models.CASCADE,
+                               related_name='requests_new')
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'REQUESTS_NEW'
         unique_together = (('uid', 'table_name', 'rdt'),)
 
@@ -227,6 +242,9 @@ class User(AbstractUser):
 
         return super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.name
+
 
 class UserAdmin(models.Model):
     id = models.OneToOneField(User, models.CASCADE, db_column='ID', primary_key=True)
@@ -234,6 +252,9 @@ class UserAdmin(models.Model):
     class Meta:
         managed = False
         db_table = 'USER_ADMIN'
+
+    def __str__(self):
+        return self.id.name
 
 
 class UserEvaluator(models.Model):
@@ -243,6 +264,9 @@ class UserEvaluator(models.Model):
         managed = False
         db_table = 'USER_EVALUATOR'
 
+    def __str__(self):
+        return self.id.name
+
 
 class UserSubmitter(models.Model):
     id = models.OneToOneField(User, models.CASCADE, db_column='ID', primary_key=True)
@@ -250,6 +274,9 @@ class UserSubmitter(models.Model):
     class Meta:
         managed = False
         db_table = 'USER_SUBMITTER'
+
+    def __str__(self):
+        return self.id.name
 
 
 class MealReview(models.Model):

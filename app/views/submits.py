@@ -64,9 +64,10 @@ def create_related_instances(model_class, request, rows):
     user_submitter = get_object_or_404(UserSubmitter, id=request.user)
 
     Submits.objects.create(uid=user_submitter, table_name=raw_file_metadata)
-    rdt = RawDataTemplate.objects.create(raw_data=request.FILES['file'])
+    text = RawDataTemplate.convert_csv_to_text(request.FILES['file'])
+    rdt = RawDataTemplate.objects.create(raw_data=text)
     parsing_data_seq = ParsingDataSeq.objects.create(total_tuple_count=len(rows),
-                                                     duplicated_tuple_count=len(rows) - len(set(rows)))
+                                                     duplicated_tuple_count=len(rows) - len(remove_duplicates(rows)))
     RequestsNew.objects.create(table_name=task_metadata, rdt=rdt, status=RequestsNew.Status.NON_PASS,
                                uid=user_submitter, pds=parsing_data_seq)
 
@@ -76,4 +77,8 @@ def create_model_instance(row, header, model_class):
     if len(data_dict.values()) == len(header):
         return model_class(**data_dict)
     return None
+
+
+def remove_duplicates(rows):
+    return set(tuple(row) for row in rows)
 
