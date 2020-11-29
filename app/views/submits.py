@@ -61,7 +61,7 @@ def create_related_instances(model_class, request, rows):
     table_name = model_class._meta.db_table
     raw_file_metadata = get_object_or_404(RawFileMetadata, table_name=table_name)
     task_metadata = get_object_or_404(TaskMetadata, table_name=table_name)
-    user_submitter = get_object_or_404(UserSubmitter, id=request.user)
+    user_submitter = get_object_or_404(UserSubmitter, user=request.user)
 
     Submits.objects.create(uid=user_submitter, table_name=raw_file_metadata)
     text = RawDataTemplate.convert_csv_to_text(request.FILES['file'])

@@ -1,4 +1,4 @@
-
+-- create database db2020;
 USE db2020;
 
 CREATE TABLE IF NOT EXISTS USER (

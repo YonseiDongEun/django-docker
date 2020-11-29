@@ -95,7 +95,6 @@ class Migration(migrations.Migration):
                 ('password', models.CharField(max_length=128, verbose_name='password')),
                 ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
                 ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
-                ('username', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.', max_length=150, unique=True, validators=[django.contrib.auth.validators.UnicodeUsernameValidator()], verbose_name='username')),
                 ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
                 ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
                 ('id', models.BigAutoField(db_column='ID', primary_key=True, serialize=False)),

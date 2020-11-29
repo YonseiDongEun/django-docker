@@ -105,7 +105,6 @@ class RawDataTemplate(models.Model):
         return '\n'.join(rows)
 
 
-
 class RawFileMetadata(models.Model):
     table_name = models.CharField(db_column='TABLE_NAME', primary_key=True, max_length=50)
     display_name = models.CharField(db_column='DISPLAY_NAME', max_length=15)
@@ -133,7 +132,7 @@ class RequestsNew(models.Model):
                                related_name='requests_new')
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'REQUESTS_NEW'
         unique_together = (('uid', 'table_name', 'rdt'),)
 
@@ -202,6 +201,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
     first_name = None
     last_name = None
+    username = None
     date_joined = None
 
     USERNAME_FIELD = 'name'
@@ -233,6 +233,7 @@ class User(AbstractUser):
         return self.name
 
     def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
         if self.role == self.UserType.ADMIN:
             UserAdmin.objects.get_or_create(user=self)
         if self.role == self.UserType.EVALUATOR:
@@ -240,43 +241,41 @@ class User(AbstractUser):
         if self.role == self.UserType.SUBMITTER:
             UserSubmitter.objects.get_or_create(user=self)
 
-        return super().save(*args, **kwargs)
-
     def __str__(self):
         return self.name
 
 
 class UserAdmin(models.Model):
-    id = models.OneToOneField(User, models.CASCADE, db_column='ID', primary_key=True)
+    user = models.OneToOneField(User, models.CASCADE, db_column='ID', primary_key=True)
 
     class Meta:
         managed = False
         db_table = 'USER_ADMIN'
 
     def __str__(self):
-        return self.id.name
+        return self.user.name
 
 
 class UserEvaluator(models.Model):
-    id = models.OneToOneField(User, models.CASCADE, db_column='ID', primary_key=True)
+    user = models.OneToOneField(User, models.CASCADE, db_column='ID', primary_key=True)
 
     class Meta:
         managed = False
         db_table = 'USER_EVALUATOR'
 
     def __str__(self):
-        return self.id.name
+        return self.user.name
 
 
 class UserSubmitter(models.Model):
-    id = models.OneToOneField(User, models.CASCADE, db_column='ID', primary_key=True)
+    user = models.OneToOneField(User, models.CASCADE, db_column='ID', primary_key=True)
 
     class Meta:
         managed = False
         db_table = 'USER_SUBMITTER'
 
     def __str__(self):
-        return self.id.name
+        return self.user.name
 
 
 class MealReview(models.Model):
