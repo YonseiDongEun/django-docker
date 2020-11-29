@@ -1,4 +1,4 @@
-from django.contrib.auth.models import PermissionsMixin, AbstractUser
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import TextChoices
 
@@ -7,8 +7,8 @@ class Evaluates(models.Model):
     uid = models.OneToOneField('UserEvaluator', models.CASCADE, db_column='UID',
                                primary_key=True)
     pds = models.ForeignKey('ParsingDataSeq', models.DO_NOTHING, db_column='PDS_ID')
-    status = models.CharField(db_column='STATUS', max_length=1)
-    p_np = models.TextField(db_column='P_NP')  # This field type is a guess.
+    status = models.CharField(db_column='STATUS', max_length=1, blank=True, null=True)
+    p_np = models.IntegerField(db_column='P_NP')  # This field type is a guess.
     rating = models.IntegerField(db_column='RATING')
 
     class Meta:
@@ -93,7 +93,7 @@ class RawDataTemplate(models.Model):
 
 
 class RawFileMetadata(models.Model):
-    table_name = models.CharField(db_column='TABLE_NAME', primary_key=True, max_length=15)
+    table_name = models.CharField(db_column='TABLE_NAME', primary_key=True, max_length=50)
     display_name = models.CharField(db_column='DISPLAY_NAME', max_length=15)
     mapping_sql_query = models.CharField(db_column='MAPPING_SQL_QUERY', max_length=1000)
     task_name = models.ForeignKey('TaskMetadata', models.DO_NOTHING,
@@ -105,12 +105,17 @@ class RawFileMetadata(models.Model):
 
 
 class RequestsNew(models.Model):
+    class Status(TextChoices):
+        PASS = 'P', 'pass'
+        NON_PASS = 'N', 'non_pass'
+
     uid = models.OneToOneField('UserSubmitter', models.CASCADE, db_column='UID',
                                primary_key=True)
     table_name = models.ForeignKey('TaskMetadata', models.DO_NOTHING,
                                    db_column='TABLE_NAME')
     rdt = models.ForeignKey(RawDataTemplate, models.DO_NOTHING, db_column='RDT_ID')
-    status = models.CharField(db_column='STATUS', max_length=1)
+    status = models.CharField(db_column='STATUS', max_length=1, choices=Status.choices)
+    pds = models.OneToOneField('ParsingDataSeq', on_delete=models.CASCADE)
 
     class Meta:
         managed = False
@@ -134,22 +139,26 @@ class Submits(models.Model):
                                primary_key=True)
     table_name = models.ForeignKey(RawFileMetadata, models.DO_NOTHING,
                                    db_column='TABLE_NAME')
-    subm = models.ForeignKey(Submission, models.DO_NOTHING, db_column='SUBM_ID')
+    subm = models.ForeignKey(Submission, models.DO_NOTHING, db_column='SUBM_ID', null=True,
+                             blank=True)  # 해당 연결관계의 필요성을 느끼지 못해 추가하지 않음
 
     class Meta:
         managed = False
         db_table = 'SUBMITS'
-        unique_together = (('uid', 'table_name', 'subm'),)
+        unique_together = (('uid', 'table_name',),)
 
 
 class TaskMetadata(models.Model):
-    table_name = models.CharField(db_column='TABLE_NAME', primary_key=True, max_length=15)
+    table_name = models.CharField(db_column='TABLE_NAME', primary_key=True, max_length=50)
     display_name = models.CharField(db_column='DISPLAY_NAME', max_length=15)
     description = models.CharField(db_column='DESCRIPTION', max_length=100, blank=True,
                                    null=True)
     min_upload_cycle = models.IntegerField(db_column='MIN_UPLOAD_CYCLE')
-    activated = models.TextField(db_column='ACTIVATED')  # This field type is a guess.
+    activated = models.IntegerField(db_column='ACTIVATED')  # This field type is a guess.
     pass_criterion = models.IntegerField(db_column='PASS_CRITERION')
+
+    # schema = models.TextField(verbose_name='생성 스키마')  # create table ~~~~
+    # fields = models.TextField(verbose_name='필드 (순서대로)')  # ID, NAME, ....
 
     class Meta:
         managed = False
@@ -208,6 +217,16 @@ class User(AbstractUser):
         """Return the short name for the user."""
         return self.name
 
+    def save(self, *args, **kwargs):
+        if self.role == self.UserType.ADMIN:
+            UserAdmin.objects.get_or_create(user=self)
+        if self.role == self.UserType.EVALUATOR:
+            UserEvaluator.objects.get_or_create(user=self)
+        if self.role == self.UserType.SUBMITTER:
+            UserSubmitter.objects.get_or_create(user=self)
+
+        return super().save(*args, **kwargs)
+
 
 class UserAdmin(models.Model):
     id = models.OneToOneField(User, models.CASCADE, db_column='ID', primary_key=True)
@@ -231,3 +250,37 @@ class UserSubmitter(models.Model):
     class Meta:
         managed = False
         db_table = 'USER_SUBMITTER'
+
+
+class MealReview(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='meal_reviews')
+    name = models.TextField(verbose_name='음식 메뉴 이름', blank=True, null=True)
+    price = models.IntegerField(verbose_name='가격', blank=True, null=True)
+    portion = models.TextField(verbose_name='양', blank=True, null=True)
+    taste = models.IntegerField(verbose_name='맛', blank=True, null=True)
+
+    class Meta:
+        db_table = 'MEAL_REVIEW'
+
+
+class SideDishesReview(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='side_dishes_reviews')
+    name = models.TextField(verbose_name='사이드 메뉴 이름', blank=True, null=True)
+    price = models.IntegerField(verbose_name='가격', blank=True, null=True)
+    portion = models.TextField(verbose_name='양', blank=True, null=True)
+    taste = models.IntegerField(verbose_name='맛', blank=True, null=True)
+
+    class Meta:
+        db_table = 'SIDE_DISHES_REVIEW'
+
+
+class StyleReview(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='style_reviews')
+    name = models.TextField(verbose_name='식당 이름', blank=True, null=True)
+    atmosphere = models.IntegerField(verbose_name='분위기', blank=True, null=True)
+    sanitation = models.IntegerField(verbose_name='청결', blank=True, null=True)
+    toilet = models.IntegerField(verbose_name='화장실 여부', blank=True, null=True)
+    parking = models.IntegerField(verbose_name='주차장 여부', blank=True, null=True)
+
+    class Meta:
+        db_table = 'STYLE_REVIEW'

@@ -1,0 +1,31 @@
+{% extends 'admin/base.html' %}
+
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" action="{% url 'app:submit' %}">
+  {% csrf_token %}
+  <div class="my-4">
+    <div class="alert"
+    <div class="input-group mb-3">
+      <select name="task">
+        <option>MealReview</option>
+        <option>SideDishesReview</option>
+        <option>StyleReview</option>
+      </select>
+      <div class="custom-file col-4">
+        <input type="file" class="custom-file-input" name="file" aria-describedby="inputGroupFileAddon01">
+        <label class="custom-file-label" for="inputGroupFile01">파일을 업로드해주세요</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="my-2 mt-5">
+    <button class="btn btn-primary" type="submit">업데이트</button>
+  </div>
+</form>
+
+
+{% endblock %}
