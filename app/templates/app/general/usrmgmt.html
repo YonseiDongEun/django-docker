@@ -1,0 +1,24 @@
+{% extends "app/general/base.html" %}
+{% block title %}User Management{% endblock %}
+
+{% block content %}
+    <table class="table table-bordered table-hover" id ="users-table">
+        <tr>
+            <td><strong>ID</strong></td>
+            <td><strong>Role</strong></td>
+        </tr>
+    </table>
+{% endblock content %}
+
+{% block script %}
+<script src="static/js/db_to_dom.js"></script>
+<script>
+    $(async function(){
+        var users = await fetch_json("http://127.0.0.1:5000/db/users/get");
+        var tbl = $("#users-table")
+        for( var user of users){
+            tbl.append(to_table_row(user))
+        }
+    })
+</script>
+{% endblock script %}

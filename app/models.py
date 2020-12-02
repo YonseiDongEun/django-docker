@@ -190,7 +190,9 @@ class User(AbstractUser):
         SUBMITTER = 'S', '제출자'
 
     id = models.BigAutoField(db_column='ID', primary_key=True)
-    name = models.CharField(db_column='NAME', max_length=15, blank=True, null=True, unique=True)
+    user_id = models.CharField(db_column='USER_ID', max_length=15, blank=False, unique=True)
+    name = models.CharField(db_column='NAME', max_length=15, blank=True, null=True)
+    address = models.CharField(db_column='USER_ADDRESS', max_length=64, blank=True, null=True)
     birth = models.DateField(db_column='BIRTH', blank=True, null=True)
     phone = models.CharField(db_column='PHONE', max_length=11, blank=True, null=True)
     gender = models.CharField(db_column='GENDER', max_length=1, blank=True, null=True, choices=Gender.choices)
@@ -204,7 +206,7 @@ class User(AbstractUser):
     username = None
     date_joined = None
 
-    USERNAME_FIELD = 'name'
+    USERNAME_FIELD = 'user_id'
 
     class Meta:
         managed = True

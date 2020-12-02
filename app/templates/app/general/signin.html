@@ -1,0 +1,13 @@
+{% extends "app/general/base.html" %}
+{% block title %}Sign in{% endblock title %}
+
+{% block content %}
+    <form method="POST" action="{% url 'app:signin' %}">
+        {% csrf_token %}
+        <label for="ID">ID</label>
+        <input type="text" name="id" class="form-control">
+        <label for="PW">PW</label>
+        <input type="password" name="pw" class="form-control">
+        <input type="submit" value="Sign In" class="form-control">
+    </form>
+{% endblock content %}

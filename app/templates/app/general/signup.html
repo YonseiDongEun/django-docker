@@ -1,0 +1,36 @@
+{% extends "app/general/base.html" %}
+{% block title %}Sign up{% endblock title %}
+
+{% block content %}
+    <form method="POST" action="{% url 'app:signup' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label >ID</label>
+            <input type="text" name="id" class="form-control">
+            <label >PW</label>
+            <input type="password" name="pw" class="form-control">
+            <label >Role</label>
+            <select name="role"class="form-control">
+                <option value="submitter">Submitter</option>
+                <option value="evaluator">Evaluator</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label >Birth</label>
+            <input type="date" name="birth" class="form-control">
+            <label >Phone</label>
+            <input type="tel" name="phone" class="form-control">
+            <label >Gender</label>
+            <select name="gender"class="form-control">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+            <label >Name</label>
+            <input type="text" name="name" class="form-control">
+            <label >Address</label>
+            <input type="text" name="address" class="form-control">
+        </div>
+        <input type="submit" value="Sign Up" class="form-control">
+    </form>
+{% endblock content %}

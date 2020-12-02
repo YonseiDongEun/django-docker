@@ -1,0 +1,32 @@
+{% extends "app/general/base.html" %}
+
+{% block title %}My Account{% endblock title %}
+
+{% block content %}
+    <form method="POST" action="{% url 'app:myaccount' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label >ID</label>
+            <input type="text" name="id" class="form-control" value={{user.user_id}}>
+            <label >PW</label>
+            <input type="password" name="pw" class="form-control">
+        </div>
+
+        <div class="form-group">
+            <label >Birth</label>
+            <input type="date" name="birth" class="form-control" value={{user.birth}}>
+            <label >Phone</label>
+            <input type="tel" name="phone" class="form-control" value={{user.phone|default:""}}>
+            <label >Gender</label>
+            <select name="gender"class="form-control" value={{user.gender}}>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+            <label >Name</label>
+            <input type="text" name="name" class="form-control" value={{user.name}}>
+            <label >Address</label>
+            <input type="text" name="address" class="form-control" value={{user.user_address}}>
+        </div>
+        <input type="submit" value="Update Info" class="form-control">
+    </form>
+{% endblock content %}
