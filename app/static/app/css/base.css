@@ -1,9 +1,24 @@
 
-form{
+.center-col{
     width: 40%;
+    align-self: center;
+    text-align: center;
+    margin:4em;
 }
 
 .flex-container{
     display:flex;
     justify-content:center;
+}
+
+.flex-col{
+    flex-direction:column;
+}
+
+.flex-row{
+    flex-direction:row;
+}
+
+.hide{
+    display:none;
 }

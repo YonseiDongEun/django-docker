@@ -2,12 +2,10 @@
 {% block title %}Sign in{% endblock title %}
 
 {% block content %}
-    <form method="POST" action="{% url 'app:signin' %}">
+    <form class='center-col' method="POST" action="{% url 'app:signin' %}">
         {% csrf_token %}
-        <label for="ID">ID</label>
-        <input type="text" name="id" class="form-control">
-        <label for="PW">PW</label>
-        <input type="password" name="pw" class="form-control">
+        {% include "app/general/forminput.html" with input_label="ID" input_name="id" input_width=3 %}
+        {% include "app/general/forminput.html" with input_label="PW" input_name="pw" input_type="password" input_width=3 %}
         <input type="submit" value="Sign In" class="form-control">
     </form>
 {% endblock content %}

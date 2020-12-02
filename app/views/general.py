@@ -76,4 +76,5 @@ def view_tskmgmt(request):
 def view_usrmgmt(request):
     if(not account.is_admin(request)):
         return redirect("/")
-    return render_template_UI(request,'app/general/usrmgmt.html',{})
+    context={}
+    return render_template_UI(request,'app/general/usrmgmt.html',context)

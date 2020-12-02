@@ -20,7 +20,9 @@ _navitems={
         ("Create Task","tskcreate"),
         ("Manage Task","tskmgmt"),
         ("Manage Users","usrmgmt")],
+
     "evaluator":[],
+    
     "submitter":[("Upload","upload")],
 }
 def get_navitems(request):

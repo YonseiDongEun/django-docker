@@ -1,24 +1,57 @@
 {% extends "app/general/base.html" %}
 {% block title %}User Management{% endblock %}
 
+{% load static %}
+
 {% block content %}
+    <div class="flex-row input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon1">WHERE</span>
+        </div>
+            <input id='txt_sql' type="text" class="form-control" value="" placeholder="True" aria-label="sql where" aria-describedby="basic-addon2">
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" id='btn_execute'>Execute</button>
+        </div>
+    </div>
+    <div id="alert_failed" class="alert alert-danger hide" role="alert">
+        <strong>SQL Query Failed</strong> Not a valid where clause.
+      </div>
     <table class="table table-bordered table-hover" id ="users-table">
         <tr>
             <td><strong>ID</strong></td>
+            <td><strong>Name</strong></td>
             <td><strong>Role</strong></td>
+            <td><strong>Gender</strong></td>
+            <td><strong>Phone</strong></td>
+            <td><strong>Birth</strong></td>
         </tr>
     </table>
 {% endblock content %}
-
 {% block script %}
-<script src="static/js/db_to_dom.js"></script>
+<script src="{% static '/app/js/db_to_dom.js' %}"></script>
 <script>
+    do_query = async function(sql_st){
+        var query_url = new URL("api/db/users/",window.location.origin)
+        var post_data = {sql_st}
+        var res = await fetch_json_post(query_url.href, post_data);
+        var tbl = document.getElementById("users-table")
+        console.log(res)
+        var success = res[0];
+        if(success)
+            $("#alert_failed")[0].style.display="None"
+        else
+            $("#alert_failed")[0].style.display="Block"
+        json_array_as_table(res, tbl)
+    }
     $(async function(){
-        var users = await fetch_json("http://127.0.0.1:5000/db/users/get");
-        var tbl = $("#users-table")
-        for( var user of users){
-            tbl.append(to_table_row(user))
-        }
+        $("#btn_execute").on('click',function(){
+            do_query( $("#txt_sql").val());
+        });
+        $("#txt_sql").on('keydown',function(e){
+            if(e.keyCode==13)
+                do_query( $("#txt_sql").val());
+        });
+        do_query("")
     })
 </script>
 {% endblock script %}

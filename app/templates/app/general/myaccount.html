@@ -3,29 +3,22 @@
 {% block title %}My Account{% endblock title %}
 
 {% block content %}
-    <form method="POST" action="{% url 'app:myaccount' %}">
+    <form method="POST" class='center-col' action="{% url 'app:myaccount' %}">
         {% csrf_token %}
         <div class="form-group">
-            <label >ID</label>
-            <input type="text" name="id" class="form-control" value={{user.user_id}}>
-            <label >PW</label>
-            <input type="password" name="pw" class="form-control">
-        </div>
+            {% include "app/general/forminput.html" with input_value=user.user_id input_label="ID" input_name="id" input_width=5 %}
+            {% include "app/general/forminput.html" with input_label="PW" input_name="pw" input_type="password" input_width=5 %}
 
         <div class="form-group">
-            <label >Birth</label>
-            <input type="date" name="birth" class="form-control" value={{user.birth}}>
-            <label >Phone</label>
-            <input type="tel" name="phone" class="form-control" value={{user.phone|default:""}}>
-            <label >Gender</label>
-            <select name="gender"class="form-control" value={{user.gender}}>
+            {% include "app/general/forminput.html" with input_value=user.birth input_label="Birth" input_name="birth" input_type="date" input_width=5 %}
+            {% include "app/general/forminput.html" with input_value=user.phone input_label="Phone" input_name="phone" input_type="tel" input_width=5 %}
+            <select name="gender"class="form-control" value={{user.gender}}> 
+                <!-- TODO: fix gender default value -->
                 <option value="male">Male</option>
                 <option value="female">Female</option>
             </select>
-            <label >Name</label>
-            <input type="text" name="name" class="form-control" value={{user.name}}>
-            <label >Address</label>
-            <input type="text" name="address" class="form-control" value={{user.user_address}}>
+            {% include "app/general/forminput.html" with input_value=user.name input_label="Name" input_name="name" input_width=5 %}
+            {% include "app/general/forminput.html" with input_value=user.user_address input_label="Address" input_name="address" input_width=5 %}
         </div>
         <input type="submit" value="Update Info" class="form-control">
     </form>
