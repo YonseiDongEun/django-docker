@@ -14,8 +14,6 @@ class SignupForm(forms.Form):
 
 
 def create_account(request):
-
-    #TODO: verity these are safe and legal
     id_ = request.POST['id']
     pw_ = request.POST['pw']
     role_=request.POST['role']
@@ -30,35 +28,30 @@ def create_account(request):
     if(not(2<=len(str(pw_))<=15)):
         return False
 
-    if(role_=='submitter'):
-        role_ = User.UserType.SUBMITTER
-    elif(role_=='evaluator'):
-        role_ = User.UserType.EVALUATOR
-    else:
+    role_ = get_role_constant(role_)
+    if(role_ is None):
         return False
     
-    if(gender_=="male"):
-        gender_ = User.Gender.MALE
-    elif(gender_=="female"):
-        gender_ = User.Gender.FEMALE
-    else:
+    gender_ = get_gender_const(gender_)
+    if(gender_ is None):
         return False
     
     birth_ = dateparse.parse_date(birth_)
     if(birth_ is None):
         pass
 
-    r=User.objects.create(user_id=id_,name=name_,address=address_,gender=gender_,phone=phone_,birth=birth_,role=role_)
-    r.set_password(pw_)
-    r.save()
-
-    return True
+    try:
+        r=User.objects.create(user_id=id_,name=name_,address=address_,gender=gender_,phone=phone_,birth=birth_,role=role_)
+        r.set_password(pw_)
+        r.save()
+        return True
+    except:
+        return False
 
 def signin(request):
     id = request.POST['id']
     pw = request.POST['pw']
     user = authenticate(request, username=id,password=pw)
-    print(user)
     if( user is None):
         return False
     else:
@@ -72,22 +65,33 @@ def signout(request):
     logout(request)
     return
 
+def delete_account(request):
+    if(not request.user.is_authenticated) or (is_admin(request)):
+        return False
+    u = request.user
+    signout(request)
+    u.delete()
+    return True
+    
 def update_info(request):
     u = get_user(request)
     form = request.POST
 
-    u.user_id=form['id']
-    u.birth = dateparse.parse_date(form['birth'])
-    u.phone = form['phone']
-    # u.gender = form['gender']
-    u.name = form['name']
-    u.address = form['address']
+    try:
+        u.user_id=form['id']
+        u.birth = dateparse.parse_date(form['birth'])
+        u.phone = form['phone']
+        u.gender = get_gender_const(form['gender']) or User.Gender.MALE
+        u.name = form['name']
+        u.address = form['address']
 
-    if(2<=len(str(form['pw']))<=15):
-        u.set_password(form['pw'])
-    u.save()
-    request.session['user_id'] = str(u.user_id)
-    return
+        if(2<=len(str(form['pw']))<=15):
+            u.set_password(form['pw'])
+        u.save()
+        request.session['user_id'] = str(u.user_id)
+        return True
+    except:
+        return False
 
 def get_user(request):
     user_id = get_id(request)
@@ -108,20 +112,64 @@ def get_role(request):
     else:
         return 'G'
 
+_dict_role_fullname={
+    'G':"Guest",
+    'S':"Submitter",
+    'A':"Administrator",
+    'E':"Evaluator"
+}
+
 def get_role_fullname(request):
     r = get_role(request)
-    if(r=='G'):
-        return "guest"
-    elif(r=='S'):
-        return "submitter"
-    elif(r=='A'):
-        return "administrator"
-    elif(r=='E'):
-        return "evaluator"
+    return _dict_role_fullname[r]
+def get_role_constant(str, allow_admin=False):
+    i = str[0].lower()
+    if(i=='s'):
+        return User.UserType.SUBMITTER
+    elif(i=='e'):
+        return User.UserType.EVALUATOR
+    elif(i=='a' and allow_admin):
+        return User.UserType.ADMIN
     else:
-        raise Exception("invalid case")
-    
+        return None
+
+def get_role_initial(str):
+    return str[0]
+
 def is_admin(request):
     return get_role(request) == 'A'
-    # return get_role()=="admin"
 
+def is_guest(request):
+    return get_role(request) == 'G'
+
+def is_submitter(request):
+    return get_role(request) == 'S'
+
+def is_evaluator(request):
+    return get_role(request) == 'E'
+
+_dict_gender_fullname={
+    'M':"Male",
+    'F':"Female",
+    'U':"Unknown"
+}
+
+def get_gender(request):
+    if(is_guest(request)):
+        return 'U'
+    g = request.user.gender
+    if(g not in _dict_gender_fullname):
+        g = 'U'
+    return g
+
+def get_gender_fullname(request):
+    g = get_gender(request)
+    return _dict_gender_fullname[g]
+def get_gender_const(str):
+    i = str[0].lower()
+    if(i=='m'):
+        return User.Gender.MALE
+    elif(i=='f'):
+        return User.Gender.FEMALE
+    else:
+        return None

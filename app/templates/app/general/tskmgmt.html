@@ -1,5 +1,5 @@
 {% extends "app/general/base.html" %}
-{% block title %}User Management{% endblock %}
+{% block title %}Task Management{% endblock %}
 
 {% load static %}
 
@@ -14,7 +14,7 @@
         </div>
     </div>
     <div id="alert_failed" class="alert alert-danger hide" role="alert"></div>
-    <table class="table table-bordered table-hover" id ="users-table">
+    <table class="table table-bordered table-hover" id ="tasks-table">
     </table>
 {% endblock content %}
 {% block script %}
@@ -25,7 +25,7 @@ $(function(){
         var id = ev.target.parentElement.firstChild.textContent
         location.href = id
     };
-    setup_query_ui( "api/db/users/", "#users-table", "#alert_failed", "#btn_execute", "#txt_sql",callback)
+    setup_query_ui( "api/db/tasks/", "#tasks-table", "#alert_failed", "#btn_execute", "#txt_sql",callback)
 });
 </script>
 {% endblock script %}

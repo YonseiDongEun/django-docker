@@ -63,3 +63,41 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
+setup_query_ui = function( api_url, tbl_selector, alert_selector, execute_selector, input_selector, callback){
+    do_query = async function(sql_st){
+        var query_url = new URL(api_url, window.location.origin)
+        var post_data = {sql_st}
+        var res = await fetch_json_post(query_url.href, post_data);
+        var tbl = $(tbl_selector)[0]
+        var success = res[0];
+        var alert_dom = $(alert_selector)[0]
+        if(success){
+            alert_dom.style.display="None"
+        }
+        else{
+            var alert_type = document.createElement("strong")
+            var alert_desc = ""
+            alert_dom.innerHTML=""
+            alert_type.innerText = "SQL Query Failed"
+            alert_desc = "Not a valid where clause."
+            alert_dom.append(alert_type)
+            alert_dom.append(" | ")
+            alert_dom.append(alert_desc)
+            alert_dom.style.display="Block"
+        }
+        json_array_as_table(res, tbl)
+        $(tbl_selector).find("td").on("click",callback)
+    }
+    $(async function(){
+        $(execute_selector).on('click',function(){
+            do_query( $(input_selector).val());
+        });
+        $(input_selector).on('keydown',function(e){
+            if(e.keyCode==13)
+                do_query( $(input_selector).val());
+        });
+        do_query("")
+    })
+
+}

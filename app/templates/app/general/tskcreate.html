@@ -1,32 +1,62 @@
 {% extends "app/general/base.html" %}
+{% block title %}Task Create{% endblock %}
 
 {% block content %}
-    <form class='center-col' method="POST" action="">
-        <p>Create Task Data Table:</p>
+    <form class='center-col' method="POST" action="{% url 'app:tskcreate' %}">
+        {% csrf_token %}
+        <h1>Create New Task</h1>
         <div class="form-group">
-            <label >Table Name</label>
-            <input type="text" name="tname" class="form-control">
-            <label >Display Name</label>
-            <input type="text" name="dname" class="form-control">
-            <label >Table Description</label>
-            <input type="text" name="tdesc" class="form-control">
-            <label >Minimum Upload Cycle</label>
-            <input type="text" name="minupcyc" class="form-control">
-            <input type="button" value="Add New Column.." class="form-control">
+            {% include "app/general/forminput.html" with input_label="Task Name" input_name="tname" input_width=7 %}
+            {% include "app/general/formtextarea.html" with input_label="Description" input_name="tdesc" input_width=7 %}
+            {% include "app/general/forminput.html" with input_label="Upload Cycle" input_name="uploadcycle" input_type='number' input_value=30 input_width=7 %}
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <select id="col_type" class="form-control">
+                        <option value="text">TEXT</option>
+                        <option value="int">INT</option>
+                        <option value="real">REAL</option>
+                        <option value="date">DATE</option>
+                        <option value="time">TIME</option>
+                    </select>
+                </div>
+                <input type="text" id="col_name" class="form-control" aria-label="Column Name" placeholder="Column Name">
+                <div class="input-group-append">
+                    <button type="button" id="col_create" class="form-control">New Column</button>
+                </div>
+              </div>
+            <table class="table table-bordered table-hover" >
+                <tbody id ="col_tbody">
+                </tbody>
+            </table>
         </div>
-
-        <div class="form-group">
-        <p>Create Raw Data Type Table:</p>
-            <label >Table Name</label>
-            <input type="text" name="otname" class="form-control">
-            <label >Display Name</label>
-            <input type="text" name="odname" class="form-control">
-            <label >Mapping SQL Statement</label>
-            <input type="text" name="mappingsql" class="form-control">
-        </div>
-        <input type="button" value="Add Another Raw Data Type.." class="form-control">
-
         <input type="submit" value="Create!" class="form-control">
 
     </form>
 {% endblock content %}
+
+{% block script %}
+<script>
+    $(function(){
+        var valid_identifier_pattern = /^[a-zA-Z_][a-zA-Z_0-9]{0,32}/;
+        $("#col_create").on("click",ev=>{
+            var valid_fieldname = false
+            var dom_fieldtype = $("#col_type");
+            var dom_fieldname = $("#col_name");
+            var dom_tbody = $("#col_tbody");
+            console.log("TEST")
+            if(!valid_identifier_pattern.test(dom_fieldname.val()))
+                return;
+            console.log("TEST2")
+            
+            var tr = document.createElement("tr")
+            var td1 = document.createElement("td")
+            var td2 = document.createElement("td")
+            td1.innerText = dom_fieldtype.val()
+            td2.innerText = dom_fieldname.val()
+
+            tr.append(td1,td2)
+            dom_tbody.append(tr)
+        })
+    })
+</script>
+{% endblock script%}

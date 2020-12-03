@@ -2,27 +2,31 @@
 {% block title %}Sign up{% endblock title %}
 
 {% block content %}
-    <form class='center-col' method="POST" action="{% url 'app:signup' %}">
-        {% csrf_token %}
-        <div class="form-group">
-            {% include "app/general/forminput.html" with input_label="ID" input_name="id" input_width=5 %}
-            {% include "app/general/forminput.html" with input_label="PW" input_name="pw" input_type="password" input_width=5 %}
-            <select name="role"class="form-control">
-                <option value="submitter">Submitter</option>
-                <option value="evaluator">Evaluator</option>
-            </select>
-        </div>
+    <div class='center-col'>
+        <h1>Sign Up</h1>
 
-        <div class="form-group">
-            {% include "app/general/forminput.html" with input_label="Birth" input_name="birth" input_type="date" input_width=5 %}
-            {% include "app/general/forminput.html" with input_label="Phone" input_name="phone" input_type="tel" input_width=5 %}
-            <select name="gender"class="form-control">
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-            </select>
-            {% include "app/general/forminput.html" with input_label="Name" input_name="name" input_width=5 %}
-            {% include "app/general/forminput.html" with input_label="Address" input_name="address" input_width=5 %}
-        </div>
-        <input type="submit" value="Sign Up" class="form-control">
-    </form>
+        <form method="POST" action="{% url 'app:signup' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                {% include "app/general/forminput.html" with input_label="ID" input_name="id" input_width=5 %}
+                {% include "app/general/forminput.html" with input_label="PW" input_name="pw" input_type="password" input_width=5 %}
+                <select name="role"class="form-control">
+                    <option value="submitter">Submitter</option>
+                    <option value="evaluator">Evaluator</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                {% include "app/general/forminput.html" with input_label="Birth" input_name="birth" input_type="date" input_width=5 %}
+                {% include "app/general/forminput.html" with input_label="Phone" input_name="phone" input_type="tel" input_width=5 %}
+                <select name="gender"class="form-control">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+                {% include "app/general/forminput.html" with input_label="Name" input_name="name" input_width=5 %}
+                {% include "app/general/forminput.html" with input_label="Address" input_name="address" input_width=5 %}
+            </div>
+            <input type="submit" value="Sign Up" class="form-control">
+        </form>
+    </div>
 {% endblock content %}
