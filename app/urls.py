@@ -29,6 +29,7 @@ urlpatterns = [
     # api
     path('api/db/users/',api_get_users, name='api_db_users'),
     path('api/db/tasks/',api_get_tasks, name='api_db_tasks'),
+    path('api/db/task/create',api_create_task, name='api_db_create_task'),
 ]
 
 app_name = 'app'

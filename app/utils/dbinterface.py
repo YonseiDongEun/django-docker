@@ -7,41 +7,48 @@ import json
 
 class QueryResultSerializable:
     def __init__(self, fields=None):
-        self.serializable = [False,[]]
-        if(fields is not None):
-            self.set_ordered_fields(fields)
+        self.serializable = {'success':False,'fields':[],'tuples':[]}
+        self.fields = fields
         return
 
     def toJsonResponse(self):
         return JsonResponse(self.serializable, safe=False)
 
     def set_success(self,is_success):
-        self.serializable[0]= is_success
+        self.serializable['success']= is_success
     
     def is_success(self):
-        return self.serializable[0]
+        return self.serializable['success']
     
     def set_ordered_fields(self,orderedFields):
-        self.serializable[1] = orderedFields
+        if(self.fields is not None):
+            orderedFields = [x for x in orderedFields if x['fieldname'].lower() in self.fields]
+            b= self.fields
+            orderedFields.sort(key=lambda x: b.index(x['fieldname'].lower()))
+        self.serializable['fields'] = orderedFields
     
     def get_ordered_fields(self):
-        return self.serializable[1]
+        return self.serializable['fields']
 
     def select_fields(self, u):
         fields = self.get_ordered_fields()
         result = {}
         for field in fields:
-            result[field] = u[field.upper()]
+            fieldname = field['fieldname']
+            result[fieldname] = u[fieldname.upper()]
+            if(type(result[fieldname])==bytes):
+                result[fieldname] = int.from_bytes(result[fieldname], "big")
         return result
     
     def clear_tuples(self):
-        self.serializable = self.serializable[:2]
+        self.serializable['tuples'] = []
     
     def get_tuples(self):
-        return self.serializable[2:]
+        return self.serializable['tuples']
 
     def do_select(self, from_, where_):
         self.clear_tuples()
+        self.fetch_fieldnames(from_)
         sql_st = f"SELECT * FROM {from_} WHERE {where_}"
         sql_st = to_safe_sql_select(sql_st)
         try:
@@ -50,7 +57,7 @@ class QueryResultSerializable:
                 cursor.execute(sql_st)
                 query_result = dictfetchall(cursor)
             self.set_success(True)
-            self.serializable = self.serializable + [self.select_fields(u) for u in query_result]
+            self.get_tuples().extend([self.select_fields(u) for u in query_result])
             return True
         except:
             self.set_success(False)
@@ -64,7 +71,7 @@ class QueryResultSerializable:
             with connection.cursor() as cursor:
                 cursor.execute(sql_st)
                 query_result = dictfetchall(cursor)
-            fields =  [u['Field'] for u in query_result]
+            fields = [{'fieldname':u['Field'], 'fieldtype':u['Type']} for u in query_result]
             self.set_ordered_fields(fields)
             return True
         except:
@@ -94,8 +101,9 @@ def to_safe_sql_show(sql_st):
     mat = re.match("^SHOW .{0,512}?;", sql_st)
     return mat.group()
 
-def to_safe_sql_identifier(fieldname):
-    fieldname = "dyn17_"+fieldname
+def to_safe_sql_identifier(fieldname, prefix="dyn17_"):
+    fieldname = fieldname.replace(" ","_")
+    fieldname = prefix+fieldname
     mat = re.match("^[a-zA-Z_][a-zA-Z_0-9]{0,32}", fieldname)
     return mat.group()
 

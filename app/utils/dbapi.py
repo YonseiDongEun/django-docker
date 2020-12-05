@@ -1,4 +1,5 @@
 from .dbinterface import *
+from . import task
 
 def _get_query_result(request, tablename, fields=None):
     where_="TRUE"
@@ -31,3 +32,18 @@ def api_get_tasks(request):
 
     tablename = "TASK_METADATA"
     return _get_query_result(request,tablename)
+
+def api_create_task(request):
+    if not account.is_admin(request):
+        return userinterface.render_template_error_UI(request,403)
+
+    json_data=None
+    result = False
+    if(request.body):
+        json_data = json.loads(request.body)
+    new_task = task.TaskDescriptor(json_data)
+    if(not new_task.is_valid() or new_task.table_exists()):
+        result= False
+    else:
+        result = new_task.create()
+    return JsonResponse({'success':result, 'table_name':new_task.table_name},safe=False)

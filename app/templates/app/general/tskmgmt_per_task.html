@@ -1,20 +1,28 @@
 {% extends "app/general/base.html" %}
 
-{% block content %}
-    <form class='center-col' method="POST" action="">
-        <p>Create Task Data Table:</p>
-        <div class="form-group">
-            <label >Table Name</label>
-            <input type="text" name="tname" class="form-control">
-            <label >Display Name</label>
-            <input type="text" name="dname" class="form-control">
-            <label >Table Description</label>
-            <input type="text" name="tdesc" class="form-control">
-            <label >Minimum Upload Cycle</label>
-            <input type="text" name="minupcyc" class="form-control">
-            <input type="button" value="Add New Column.." class="form-control">
-        </div>
+{% load static %}
 
+{% block title %}Task Management{% endblock title %}
+
+{% block content %}
+    <form class='center-col'>
+        {% csrf_token %}
+        <h1>Task Management</h1>
+        <div class="form-group">
+            {% include "app/general/forminput.html" with input_label="Task Name" input_name="tname" input_value=display_name input_width=7 %}
+            {% include "app/general/formtextarea.html" with input_label="Description" input_name="tdesc" input_value=description input_width=7 %}
+            {% include "app/general/forminput.html" with input_label="Upload Cycle" input_name="uploadcycle" input_type='number' input_value=upload_cycle input_width=7 %}
+            {% include "app/general/forminput.html" with input_label="Pass Criterion" input_name="passcriterion" input_type='number' input_value=pass_criterion input_width=7 %}
+            {% include "app/general/forminput.html" with input_label="Activated" input_name="activated" input_type='checkbox' input_value=activated input_width=7 %}
+
+            <table class="table table-bordered table-hover" >
+                <tbody id ="col_tbody">
+                </tbody>
+            </table>
+        </div>
+        <button type="button" class="form-control" id='tsk_create'>Update Task</button>
+    </form>
+    <form class='center-col' method="POST" action="">
         <div class="form-group">
         <p>Create Raw Data Type Table:</p>
             <label >Table Name</label>
@@ -30,3 +38,23 @@
 
     </form>
 {% endblock content %}
+
+{% block script %}
+<script src="{% static '/app/js/db_util.js' %}"></script>
+<script>
+    $(async function(){
+        var cols_dom = $("#col_tbody")[0];
+        var cols = {{columns|safe}};
+
+        for(var col of cols){
+            var tr = document.createElement("tr")
+            var td1 = document.createElement("td")
+            var td2 = document.createElement("td")
+            td1.innerText = col.fieldtype
+            td2.innerText = col.fieldname
+            tr.append(td1,td2)
+            cols_dom.append(tr)
+        }
+    })
+</script>
+{% endblock %}

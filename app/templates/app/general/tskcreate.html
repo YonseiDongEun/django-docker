@@ -1,14 +1,15 @@
 {% extends "app/general/base.html" %}
 {% block title %}Task Create{% endblock %}
-
+{% load static %}
 {% block content %}
-    <form class='center-col' method="POST" action="{% url 'app:tskcreate' %}">
+    <form class='center-col'>
         {% csrf_token %}
         <h1>Create New Task</h1>
         <div class="form-group">
             {% include "app/general/forminput.html" with input_label="Task Name" input_name="tname" input_width=7 %}
             {% include "app/general/formtextarea.html" with input_label="Description" input_name="tdesc" input_width=7 %}
             {% include "app/general/forminput.html" with input_label="Upload Cycle" input_name="uploadcycle" input_type='number' input_value=30 input_width=7 %}
+            {% include "app/general/forminput.html" with input_label="Pass Criterion" input_name="passcriterion" input_type='number' input_value=15 input_width=7 %}
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
                     <select id="col_type" class="form-control">
@@ -29,12 +30,12 @@
                 </tbody>
             </table>
         </div>
-        <input type="submit" value="Create!" class="form-control">
-
+        <button type="button" class="form-control" id='tsk_create'>Create Task</button>
     </form>
 {% endblock content %}
 
 {% block script %}
+<script src="{% static '/app/js/db_util.js' %}"></script>
 <script>
     $(function(){
         var valid_identifier_pattern = /^[a-zA-Z_][a-zA-Z_0-9]{0,32}/;
@@ -43,10 +44,8 @@
             var dom_fieldtype = $("#col_type");
             var dom_fieldname = $("#col_name");
             var dom_tbody = $("#col_tbody");
-            console.log("TEST")
             if(!valid_identifier_pattern.test(dom_fieldname.val()))
                 return;
-            console.log("TEST2")
             
             var tr = document.createElement("tr")
             var td1 = document.createElement("td")
@@ -56,6 +55,29 @@
 
             tr.append(td1,td2)
             dom_tbody.append(tr)
+        })
+        $("#tsk_create").on("click",async ev=>{
+            var api_url = new URL("api/db/task/create", window.location.origin);
+            var post_data = {}
+            post_data.display_name = $('#tname').val()
+            post_data.description = $('#tdesc').val()
+            post_data.upload_cycle = $('#uploadcycle').val()
+            post_data.pass_criterion = $('#passcriterion').val()
+            post_data.activated = false
+            var cols = []
+            var dom_tbody = $("#col_tbody")[0]
+            for( var r of dom_tbody.children){
+                var col = {}
+                col.fieldtype = r.cells[0].textContent
+                col.fieldname = r.cells[1].textContent
+                cols.push(col)
+            }
+            post_data.columns = cols
+            console.log(post_data)
+            var res = await fetch_json_post(api_url, post_data);
+            console.log(res)
+            if(res.success)
+                location.href = "/tskmgmt/"+res.table_name
         })
     })
 </script>
