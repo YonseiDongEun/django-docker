@@ -70,7 +70,9 @@ def view_tskstat(request):
 def view_tskstat_per_task(request, tblname):
     if(not account.is_admin(request)):
         return redirect("/")
-    return render_template_UI(request,'app/general/todo.html')
+    tdr = task.TaskDescriptor({'table_name':tblname})
+    context = {"taskname":tblname, 'count_accepted':dbinterface.get_count(tblname), 'count_pending':dbinterface.get_count(tblname+"_wait"), 'raws':tdr.get_raws()}
+    return render_template_UI(request,'app/general/tskstat_per_task.html',context)
 
 def view_tskcreate(request):
     if(not account.is_admin(request)):

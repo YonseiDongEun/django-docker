@@ -50,6 +50,9 @@ class QueryResultSerializable:
     
     def get_tuples(self):
         return self.serializable['tuples']
+    
+    def get_tuple_count(self):
+        return len(self.serializable['tuples'])
 
     def do_select(self, from_, where_):
         self.clear_tuples()
@@ -180,6 +183,11 @@ def select_from_where(from_, where_="TRUE", fields=None, select_=None):
     
     tuples.do_select(from_,where_)
     return tuples
+
+def get_count(table_name):
+    tuples = select_from_where(table_name)
+    return tuples.get_tuple_count()
+
 
 def to_fields(fieldnames):
     return [{'fieldname':x} for x in fieldnames]

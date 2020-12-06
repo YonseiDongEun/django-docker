@@ -102,7 +102,28 @@ setup_query_ui = function( api_url, tbl_selector, alert_selector, execute_select
         json_result_as_table(res, tbl)
         $(tbl_selector).find("tbody td").on("click",callback)
     }
+    var do_download = async function(){
+        var rows = []
+        var th = $(tbl_selector).find("thead")[0].firstChild.cells;
+        var tb = $(tbl_selector).find('tbody')[0].rows;
+        var attrs = [...th].map(x=>x.textContent)
+        rows.push(attrs)
+        rows =[attrs].concat([...tb].map(r=>[...r.cells].map(x=>x.textContent)))
+        console.log(rows)
+        var csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+        var encodedUri = encodeURI(csvContent);
+        var link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `${location.pathname.replaceAll('/','')+Date.now()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+    }
     $(async function(){
+        if(execute_selector[0]=='#'){
+            $(execute_selector+'_dl').on('click',function(){
+                do_download();
+            });
+        }
         $(execute_selector).on('click',function(){
             do_query( $(input_selector).val());
         });

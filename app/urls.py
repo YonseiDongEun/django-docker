@@ -38,7 +38,10 @@ urlpatterns = [
     path('api/db/task/raw_create',api_create_raw_type, name='api_db_create_raw'),
     path('api/db/task/<taskname>/raws',api_get_raw_types, name='api_db_get_raws'),
     path('api/db/task/<taskname>/pending',api_get_pending_submitters, name='api_db_get_pendings'),
+    path('api/db/task/<taskname>/approved',api_get_approved_submitters, name='api_db_get_approved'),
     path('api/db/task/<taskname>/update_pending',api_update_pending_submitters, name='api_db_update_pendings'),
+    path('api/db/task/<taskname>/task_accepted',api_get_accepted_data),
+    path('api/db/task/<taskname>/task_pending',api_get_pending_data),
 
     path('api/db/task/<taskname>/status/',api_submitter_pending_status, name='api_db_submitter_status'),
     path('api/db/task/<taskname>/request/',api_submitter_request_permission , name='api_db_submitter_request'),

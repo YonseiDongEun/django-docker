@@ -108,6 +108,12 @@ class TaskDescriptor:
             'columns':self.columns}
         return context
 
+    def get_raws(self):
+
+        tsk = TaskMetadata.objects.get(table_name=self.table_name)
+        raws = RawFileMetadata.objects.filter(task_name=tsk)
+        return [ {'table_name':x.table_name,'display_name':x.display_name,'size':dbinterface.get_count(x.table_name)} for x in raws]
+
 
 
 class RawDescriptor:

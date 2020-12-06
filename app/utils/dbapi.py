@@ -69,12 +69,35 @@ def api_get_raw_types(request,taskname):
     tablename = "RAW_FILE_METADATA"
     return _get_query_result(request,tablename,f"task_name='{taskname}'")
 
+def api_get_accepted_data(request,taskname):
+    if not account.is_admin(request):
+        return userinterface.render_template_error_UI(request,403)
+
+    models.TaskMetadata.objects.get(table_name=taskname)
+    return _get_query_result(request,taskname)
+
+def api_get_pending_data(request,taskname):
+    if not account.is_admin(request):
+        return userinterface.render_template_error_UI(request,403)
+
+    models.TaskMetadata.objects.get(table_name=taskname)
+    return _get_query_result(request,taskname+"_wait")
+
 def api_get_pending_submitters(request,taskname):
     if not account.is_admin(request):
         return userinterface.render_template_error_UI(request,403)
 
     tablename = "participates_in, user"
     where_="uid=id and status='p'"
+    fields = to_fields(['user_id','name','birth','phone','gender','user_address'])
+    return _get_query_result(request,tablename,where_,fields)
+
+def api_get_approved_submitters(request,taskname):
+    if not account.is_admin(request):
+        return userinterface.render_template_error_UI(request,403)
+
+    tablename = "participates_in, user"
+    where_="uid=id and status='a'"
     fields = to_fields(['user_id','name','birth','phone','gender','user_address'])
     return _get_query_result(request,tablename,where_,fields)
 
