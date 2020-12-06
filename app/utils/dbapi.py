@@ -106,7 +106,7 @@ def api_get_pending_submitters(request,taskname):
     if not account.is_admin(request):
         return userinterface.render_template_error_UI(request,403)
 
-    tablename = "participates_in, user"
+    tablename = "PARTICIPATES_IN, USER"
     where_="uid=id and status='p'"
     fields = to_fields(['user_id','name','birth','phone','gender','user_address'])
     return _get_query_result(request,tablename,where_,fields)
@@ -115,7 +115,7 @@ def api_get_approved_submitters(request,taskname):
     if not account.is_admin(request):
         return userinterface.render_template_error_UI(request,403)
 
-    tablename = "participates_in, user"
+    tablename = "PARTICIPATES_IN, USER"
     where_="uid=id and status='a'"
     fields = to_fields(['user_id','name','birth','phone','gender','user_address'])
     return _get_query_result(request,tablename,where_,fields)
@@ -261,7 +261,7 @@ def api_get_user_detail(request,usr_id):
         select_="*,cast(datediff(now(),birth)/365 as signed) as age, iat.pds_id as submission_id"
     elif(usr.role==models.User.UserType.SUBMITTER):
         fields = to_fields(["user_id","name","role","gender","phone","birth","user_address","age","task_name","status"])
-        tablename = "USER left join participates_in as pin on id=pin.uid left join task_metadata as tmd on pin.table_name=tmd.table_name"
+        tablename = "USER left join PARTICIPATES_IN as pin on id=pin.uid left join TASK_METADATA as tmd on pin.table_name=tmd.table_name"
         select_="*,cast(datediff(now(),birth)/365 as signed) as age, tmd.display_name as task_name"
 
     return _get_query_result(request,tablename,pwhere_=where_, fields=fields,select_=select_)
