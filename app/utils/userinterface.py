@@ -5,10 +5,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 def render_template_UI(request, template, context={}):
     # context['user'] = account.get_session()
     context['nav_items_'] = get_navitems(request)
+    birth = request.user.is_authenticated and str(request.user.birth) or None
     context['user_'] = {'id':account.get_id(request)
                         ,'role':account.get_role_fullname(request)
                         ,'gender':account.get_gender_fullname(request)
-                        ,'birth':str(request.user.birth)}
+                        ,'birth':birth}
     return render(request, template, context)
 
 def render_template_error_UI(request, status_code):
@@ -25,7 +26,8 @@ _navitems={
 
     "Evaluator":[],
     
-    "Submitter":[("Upload","upload")],
+    "Submitter":[("Upload","upload"),
+        ("Task List", "tsklist")],
 }
 def get_navitems(request):
     if(not request.user.is_authenticated):

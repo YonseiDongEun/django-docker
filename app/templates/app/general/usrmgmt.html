@@ -4,18 +4,7 @@
 {% load static %}
 
 {% block content %}
-    <div class="flex-row input-group mb-3">
-        <div class="input-group-prepend">
-            <span class="input-group-text" id="basic-addon1">WHERE</span>
-        </div>
-            <input id='txt_sql' type="text" class="form-control" value="" placeholder="True" aria-label="sql where" aria-describedby="basic-addon2">
-        <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button" id='btn_execute'>Execute</button>
-        </div>
-    </div>
-    <div id="alert_failed" class="alert alert-danger hide" role="alert"></div>
-    <table class="table table-bordered table-hover" id ="users-table">
-    </table>
+{% include "app/general/queryui.html" with txt_sql="txt_sql" btn_execute="btn_execute" result_table="result_table" alert_failed="alert_failed" %}
 {% endblock content %}
 {% block script %}
 <script src="{% static '/app/js/db_util.js' %}"></script>
@@ -25,7 +14,7 @@ $(function(){
         var id = ev.target.parentElement.firstChild.textContent
         location.href = id
     };
-    setup_query_ui( "api/db/users/", "#users-table", "#alert_failed", "#btn_execute", "#txt_sql",callback)
+    setup_query_ui( "api/db/users/", "#result_table", "#alert_failed", "#btn_execute", "#txt_sql",callback)
 });
 </script>
 {% endblock script %}

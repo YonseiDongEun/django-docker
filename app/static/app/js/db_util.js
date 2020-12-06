@@ -26,7 +26,8 @@ function json_result_as_table(data, tbl){
     tbl.innerHTML= ''
     var thd = tbl.createTHead()
     var tbd = tbl.createTBody()
-
+    
+    
     var r=document.createElement("tr")
     for(var i =0;i<fields.length;i++){
         var d=document.createElement("td")
@@ -36,7 +37,7 @@ function json_result_as_table(data, tbl){
         r.append(d);
     }
     thd.append(r);
-
+    
     for(var tu of data.tuples){
         var r=document.createElement("tr")
         for(var i =0;i<fields.length;i++){
@@ -46,6 +47,18 @@ function json_result_as_table(data, tbl){
         }
         tbd.append(r);
     }
+    
+    if(tbd.children.length==0){
+        var tft = tbl.createTFoot()
+        var tr = document.createElement("tr")
+        var td = document.createElement("td")
+        td.colSpan=`${fields.length}`
+        td.style.textAlign='center'
+        td.style.color='#AAA'
+        td.innerText = "(No Data)"
+        tr.append(td)
+        tft.append(tr)
+    }
 }
 
 function getCookie(name) {
@@ -54,7 +67,6 @@ function getCookie(name) {
         var cookies = document.cookie.split(';');
         for (var i = 0; i < cookies.length; i++) {
             var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
             if (cookie.substring(0, name.length + 1) === (name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
@@ -65,14 +77,14 @@ function getCookie(name) {
 }
 
 setup_query_ui = function( api_url, tbl_selector, alert_selector, execute_selector, input_selector, callback){
-    do_query = async function(sql_st){
+    var do_query = async function(sql_st){
         var query_url = new URL(api_url, window.location.origin)
         var post_data = {sql_st}
         var res = await fetch_json_post(query_url.href, post_data);
         var tbl = $(tbl_selector)[0]
         var success = res.success;
-        console.log(res)
         var alert_dom = $(alert_selector)[0]
+        console.log(res)
         if(success){
             alert_dom.style.display="None"
         }
@@ -100,5 +112,68 @@ setup_query_ui = function( api_url, tbl_selector, alert_selector, execute_select
         });
         do_query("")
     })
+}
+setup_fields_ui = function( columns, tbody_selector, col_type_selector=null, col_name_selector=null, col_create_selector=null, prefix=""){
+    var dom_tbody = $(tbody_selector)[0]
+    var valid_identifier_pattern = /^[a-zA-Z_][a-zA-Z_0-9]{0,32}/;
+    var callback = null;
+    if(col_create_selector){
+        callback = function(ev){
+            this.remove()
+        }
+    }
+    var add_col = (col)=>{
+        var tr = document.createElement("tr")
+        var td1 = document.createElement("td")
+        var td2 = document.createElement("td")
+        td1.innerText = col.fieldtype
+        td2.innerText = col.fieldname
+        if(callback)
+            $(tr).on('click',callback);
 
+            tr.append(td1,td2)
+        dom_tbody.append(tr)
+    }
+
+    var get_cols = ()=>{
+        var cols = []
+        for( var r of dom_tbody.children){
+            var col = {}
+            col.fieldtype = r.cells[0].textContent
+            col.fieldname = r.cells[1].textContent
+            cols.push(col)
+        }
+        return cols
+    }
+
+    for(var col of columns){
+        prefixed = {...col}
+        prefixed.fieldname = prefix + prefixed.fieldname
+        add_col(prefixed)
+    }
+
+    if(col_create_selector ){
+        var dom_type = $(col_type_selector)
+        var dom_name = $(col_name_selector)
+        var dom_create = $(col_create_selector)
+
+        dom_name.on("keydown",function(ev){
+            if(ev.keyCode==13)
+            dom_create.click()
+        });
+        dom_create.on("click",(ev)=>{
+            var valid_fieldname = valid_identifier_pattern.test(dom_name.val())
+            get_cols().forEach((x)=>{
+                if(x.fieldname.toLowerCase() == dom_name.val().toLowerCase())
+                    valid_fieldname = false
+            })
+            if(!valid_fieldname)
+                return;
+
+            add_col({fieldname:dom_name.val(), fieldtype:dom_type.val()})
+            dom_name.val("")
+        })
+    }
+
+    return get_cols;
 }

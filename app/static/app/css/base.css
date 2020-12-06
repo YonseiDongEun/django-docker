@@ -22,3 +22,9 @@
 .hide{
     display:none;
 }
+
+.split{
+    border-top: solid;
+    margin: 2em 0 1em 0;
+    padding: .4em 0 .4em 0;
+}

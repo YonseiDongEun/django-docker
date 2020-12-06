@@ -90,13 +90,7 @@ def view_tskmgmt_per_task(request, tblname):
     if(not cur_task.table_exists()):
         return redirect("/")
     cur_task.fetch_meta()
-    context = {'display_name':cur_task.display_name,
-        'table_name':cur_task.table_name,
-        'description':cur_task.description,
-        'pass_criterion':cur_task.pass_criterion,
-        'upload_cycle':cur_task.upload_cycle,
-        'activated':cur_task.activated,
-        'columns':cur_task.columns}
+    context = cur_task.get_context()
     return render_template_UI(request,'app/general/tskmgmt_per_task.html',context)
 
 def view_usrmgmt(request):
@@ -108,3 +102,25 @@ def view_usrmgmt_per_user(request, usrid):
     if(not account.is_admin(request)):
         return redirect("/")
     return render_template_UI(request,'app/general/todo.html')
+
+# submitter
+def view_tsklist_submitter(request):
+    if(not account.is_submitter(request)):
+        return redirect("/")
+    return render_template_UI(request,'app/submit/tasklist.html')
+
+def view_tskdetail_submitter(request, taskname):
+    if(not account.is_submitter(request)):
+        return redirect("/")
+    return render_template_UI(request,'app/submit/tskdetail.html',{'taskname':taskname})
+
+# debugging only
+def view_tskmgmt_per_task_del(request, tblname):
+    if(not account.is_admin(request)):
+        return redirect("/")
+    
+    cur_task = task.TaskDescriptor({"table_name":tblname})
+    if(not cur_task.table_exists()):
+        return redirect("/")
+    cur_task.delete()
+    return redirect("/tskmgmt")

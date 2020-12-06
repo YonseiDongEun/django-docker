@@ -1,0 +1,41 @@
+{% extends "app/general/base.html" %}
+{% block title %}Task Detail{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="center-col">
+    <p>You need permission to submit data.</p>
+    <p id='para_status'></p>
+    <button type="button" id='btn_request' disabled=true class="btn btn-success">Send Request</button>
+</div>
+{% endblock content %}
+{% block script %}
+<script src="{% static '/app/js/db_util.js' %}"></script>
+<script>
+$(async function(){
+    var status = (await fetch_json("/api/db/task/{{taskname}}/status")).status
+    switch(status){
+        case 'pending':
+            break;
+        case 'rejected':
+            break;
+        case 'approved':
+            break;
+        case 'none':
+            $('#btn_request')[0].disabled=false
+            break;
+        default:
+            console.log("invalid status: "+status)
+            break;
+    }
+    $('#para_status').text(`Current Status: ${status}`)
+    $("#btn_request").on("click",async (ev)=>{
+        var res = await fetch_json("/api/db/task/{{taskname}}/request")
+        if(res.success){
+            location.href=""
+        }
+    })
+});
+</script>
+{% endblock script %}
