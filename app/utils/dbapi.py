@@ -224,9 +224,10 @@ def api_create_account(request):
     res = {'success':False, 'errs':errs}
     if(request.body):
         json_data = json.loads(request.body)
+        print(json_data)
         res['success'] = account.create_account(request, json_data, errs)
     if(res['success']):
-        account.signin(request)
+        account.signin(request,json_data)
     return JsonResponse(res,safe=False)
 
 def api_signin(request):
