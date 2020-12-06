@@ -226,7 +226,7 @@ def api_create_account(request):
         json_data = json.loads(request.body)
         res['success'] = account.create_account(request, json_data, errs)
     if(res['success']):
-        account.signin(request)
+        account.signin(request,json_data)
     return JsonResponse(res,safe=False)
 
 def api_signin(request):
