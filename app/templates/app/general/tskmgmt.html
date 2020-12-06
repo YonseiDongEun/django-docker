@@ -1,0 +1,20 @@
+{% extends "app/general/base.html" %}
+{% block title %}Task Management{% endblock %}
+
+{% load static %}
+
+{% block content %}
+    {% include "app/general/queryui.html" with txt_sql="txt_sql" btn_execute="btn_execute" result_table="result_table" alert_failed="alert_failed" %}
+{% endblock content %}
+{% block script %}
+<script src="{% static '/app/js/db_util.js' %}"></script>
+<script>
+$(function(){
+    var callback = (ev)=>{
+        var id = ev.target.parentElement.firstChild.textContent
+        location.href = id
+    };
+    setup_query_ui( "api/db/tasks/", "#result_table", "#alert_failed", "#btn_execute", "#txt_sql",callback)
+});
+</script>
+{% endblock script %}

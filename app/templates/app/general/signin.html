@@ -1,0 +1,35 @@
+{% extends "app/general/base.html" %}
+{% block title %}Sign in{% endblock title %}
+{% load static %}
+
+{% block content %}
+    <form class='center-col'>
+        {% csrf_token %}
+        {% include "app/general/forminput.html" with input_label="ID" input_name="user_id" input_width=3 %}
+        {% include "app/general/forminput.html" with input_label="PW" input_name="pw" input_type="password" input_width=3 %}
+        <button type="button" id="signin" class="form-control">Sign In</button>
+    </form>
+{% endblock content %}
+{% block script %}
+<script src="{% static '/app/js/db_util.js' %}"></script>
+<script>
+    $(async function(){
+
+        $("#pw").on('keydown',function(ev){
+            if(ev.keyCode==13)
+                $("#signin").click()
+        })
+        $("#signin").on("click",async function(e){
+            var user_id = $("#user_id").val()
+            var pw = $("#pw").val()
+            var post_data={user_id,pw}
+            var res = await fetch_json_post("/api/db/signin",post_data);
+            console.log(res)
+            if(res.success)
+                location.href="/"
+            else
+                validation_failed(res.errs)
+        })
+    })
+</script>
+{% endblock script %}

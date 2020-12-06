@@ -1,0 +1,40 @@
+{% extends "app/general/base.html" %}
+
+{% load static %}
+
+{% block title %}Task Overview{% endblock title %}
+
+{% block content %}
+    <h1 class="split">Participating Sumbitter</h1>
+    {% include "app/general/queryui.html" with txt_sql="txt_sql_sb" btn_execute="btn_execute_sb" result_table="result_table_sb" alert_failed="alert_failed_sb" %}
+    <h1 class="split">Accepted Data</h1>
+    <p>Total count: {{count_accepted}}</p>
+    {% include "app/general/queryui.html" with txt_sql="txt_sql" btn_execute="btn_execute" result_table="result_table" alert_failed="alert_failed" %}
+    <h1 class="split">Pending Data</h1>
+    <p>Total count: {{count_pending}}</p>
+    {% include "app/general/queryui.html" with txt_sql="txt_sql_pd" btn_execute="btn_execute_pd" result_table="result_table_pd" alert_failed="alert_failed_pd" %}
+    {% for raw in raws %}
+        <h1 class="split">Raw {{raw.display_name}}</h1>
+        <p>Total count: {{raw.size}}</p>
+        {% include "app/general/queryui.html" with txt_sql="txt_sql_"|add:raw.table_name btn_execute="btn_execute_"|add:raw.table_name result_table="result_table_"|add:raw.table_name alert_failed="alert_failed_"|add:raw.table_name %}
+    {% endfor %}
+{% endblock content %}
+
+{% block script %}
+<script src="{% static '/app/js/db_util.js' %}"></script>
+<script>
+    $(async function(){
+        var callback_sb = function(ev){
+            var user_id = this.parentElement.firstElementChild.textContent;
+            location.href = `/usrmgmt/${user_id}`
+        }
+        console.log({{raws|safe}})
+        setup_query_ui( "api/db/task/{{taskname}}/approved", "#result_table_sb", "#alert_failed_sb", "#btn_execute_sb", "#txt_sql_sb",callback_sb)
+        setup_query_ui( "api/db/task/{{taskname}}/task_accepted", "#result_table", "#alert_failed", "#btn_execute", "#txt_sql")
+        setup_query_ui( "api/db/task/{{taskname}}/task_pending", "#result_table_pd", "#alert_failed_pd", "#btn_execute_pd", "#txt_sql_pd")
+        {% for raw in raws %}
+        setup_query_ui( "api/db/task/{{taskname}}/raw/{{raw.table_name}}", "#result_table_{{raw.table_name}}", "#alert_failed_{{raw.table_name}}", "#btn_execute_{{raw.table_name}}", "#txt_sql_{{raw.table_name}}")
+        {% endfor %}
+    })
+</script>
+{% endblock %}

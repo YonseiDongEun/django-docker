@@ -1,0 +1,132 @@
+{% extends "app/general/base.html" %}
+
+{% load static %}
+
+{% block title %}Task Management{% endblock title %}
+
+{% block content %}
+    <div class='center-col'>
+        <form>
+            {% csrf_token %}
+            <h1>Task Management</h1>
+            <div class="form-group">
+                {% include "app/general/forminput.html" with input_label="Task Name" input_name="tname" input_value=display_name input_width=7 %}
+                {% include "app/general/formtextarea.html" with input_label="Description" input_name="tdesc" input_value=description input_width=7 %}
+                {% include "app/general/forminput.html" with input_label="Upload Cycle" input_name="uploadcycle" input_type='number' input_value=upload_cycle input_width=7 %}
+                {% include "app/general/forminput.html" with input_label="Pass Criterion" input_name="passcriterion" input_type='number' input_value=pass_criterion input_width=7 %}
+                {% include "app/general/forminput.html" with input_label="Activated" input_name="activated" input_type='checkbox' checked=activated input_width=7 %}
+
+                <table class="table table-bordered table-hover" >
+                    <tbody id ="tsk_col_tbody">
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" class="form-control" id='tsk_update'>Update Task</button>
+        </form>
+        <h1 class="split">Pending Submitters:</h1>
+        {% include "app/general/queryui.html" with txt_sql="txt_sql_sb" btn_execute="btn_execute_sb" result_table="result_table_sb" alert_failed="alert_failed_sb" %}
+        <h1 class="split">Available Raw Data Types:</h1>
+        {% include "app/general/queryui.html" with txt_sql="txt_sql" btn_execute="btn_execute" result_table="result_table" alert_failed="alert_failed" %}
+        <form>
+            {% csrf_token %}
+            <h1  class="split">Create Raw Data Type:</h1>
+            <div class="form-group">
+                {% include "app/general/forminput.html" with input_label="Name" input_name="r_tname" input_width=7 %}
+                {% include "app/general/fieldsui.html" with col_type="col_type" col_name="col_name" col_create="col_create" %}
+                <table class="table table-bordered table-hover" >
+                    <tbody id ="col_tbody">
+                    </tbody>
+                </table>
+                <h3>Mapping from Raw Type to Task</h3>
+                {% include "app/general/formtextarea.html" with input_label="SELECT" input_name="mapping_select" input_width=7 %}
+
+            </div>
+            <button type="button" class="form-control" id='raw_create'>Create Raw Type</button>
+        </form>
+        <div id='modal_pending' class="modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Modal title</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <p id='modal_paragraph'></p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" id='allow' class="btn btn-success">Allow</button>
+                  <button type="button" id='reject' class="btn btn-danger">Reject</button>
+                  <button type="button" id='detail' class="btn btn-info">Detail</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+    </div>
+{% endblock content %}
+
+{% block script %}
+<script src="{% static '/app/js/db_util.js' %}"></script>
+<script>
+    $(async function(){
+        var cols = {{columns|safe}};
+        var callback_sb = function(ev){
+            var user_id = this.parentElement.firstElementChild.textContent;
+            $("#modal_paragraph").text(`${user_id} wants to access this task.`)
+            $("#modal_pending").modal('show')
+
+            $('#allow').on("click",async ()=>{
+                var res = await fetch_json_post("/api/db/task/{{table_name}}/update_pending",{status:'a',user_id:user_id})
+                if(res.success)
+                    location.href=""
+            })
+            $('#reject').on("click",async ()=>{
+                var res = await fetch_json_post("/api/db/task/{{table_name}}/update_pending",{status:'r',user_id:user_id})
+                if(res.success)
+                    location.href=""
+            })
+            $('#detail').on("click",()=>{
+                location.href = `/usrmgmt/${user_id}`
+            })
+        }
+        setup_query_ui( "api/db/task/{{table_name}}/pending", "#result_table_sb", "#alert_failed_sb", "#btn_execute_sb", "#txt_sql_sb",callback_sb)
+        setup_query_ui( "api/db/task/{{table_name}}/raws", "#result_table", "#alert_failed", "#btn_execute", "#txt_sql",null)
+        setup_fields_ui(cols,"#tsk_col_tbody");
+        var get_cols = setup_fields_ui(cols,"#col_tbody","#col_type","#col_name","#col_create",'r_')
+        var default_select = "";
+        for(var i=0;i<cols.length;i++)
+            default_select+= `\n, r_${cols[i].fieldname} AS ${cols[i].fieldname}`
+        default_select = default_select.substr(3)
+        $("#mapping_select").val(default_select)
+        $("#raw_create").on("click",async ev=>{
+            var api_url = new URL("api/db/task/raw_create", window.location.origin);
+            var post_data = {}
+            post_data.display_name = $('#r_tname').val()
+            post_data.mapping_select = $('#mapping_select').val()
+            post_data.task_name = "{{table_name}}";
+            post_data.columns = get_cols();
+            var res = await fetch_json_post(api_url, post_data);
+            console.log(res)
+            if(res.success)
+                location.href = ""
+            else
+                validation_failed(res.errs)
+        })
+        $("#tsk_update").on("click",async ev=>{
+            var api_url = new URL("api/db/task/update", window.location.origin);
+            var post_data = {}
+            post_data.display_name = $('#tname').val()
+            post_data.description = $('#tdesc').val()
+            post_data.upload_cycle = $('#uploadcycle').val()
+            post_data.pass_criterion = $('#passcriterion').val()
+            post_data.activated = $('#activated')[0].checked
+            post_data.table_name = "{{table_name}}";
+            var res = await fetch_json_post(api_url, post_data);
+            if(res.success)
+                location.href = ""
+        })
+    })
+</script>
+{% endblock %}

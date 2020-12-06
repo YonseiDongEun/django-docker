@@ -1,0 +1,6 @@
+<div class="flex-row input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text" style="width:{{input_width}}em;">{{input_label}}</span>
+    </div>
+    <input  id='{{input_name}}' name='{{input_name}}' type="{{input_type}}" class="form-control" placeholder="{{input_label}}" value="{{input_value}}" {% if checked %}checked={{checked}}{% endif %} aria-label="{{input_label}}">
+</div>

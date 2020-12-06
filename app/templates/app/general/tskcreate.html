@@ -1,0 +1,45 @@
+{% extends "app/general/base.html" %}
+{% block title %}Task Create{% endblock %}
+{% load static %}
+{% block content %}
+    <form class='center-col'>
+        {% csrf_token %}
+        <h1>Create New Task</h1>
+        <div class="form-group">
+            {% include "app/general/forminput.html" with input_label="Task Name" input_name="tname" input_width=7 %}
+            {% include "app/general/formtextarea.html" with input_label="Description" input_name="tdesc" input_width=7 %}
+            {% include "app/general/forminput.html" with input_label="Upload Cycle" input_name="uploadcycle" input_type='number' input_value=30 input_width=7 %}
+            {% include "app/general/forminput.html" with input_label="Pass Criterion" input_name="passcriterion" input_type='number' input_value=15 input_width=7 %}
+            {% include "app/general/fieldsui.html" with col_type="col_type" col_name="col_name" col_create="col_create" %}
+            <table class="table table-bordered table-hover" >
+                <tbody id ="col_tbody">
+                </tbody>
+            </table>
+        </div>
+        <button type="button" class="form-control" id='tsk_create'>Create Task</button>
+    </form>
+{% endblock content %}
+
+{% block script %}
+<script src="{% static '/app/js/db_util.js' %}"></script>
+<script>
+    $(function(){
+        var get_cols = setup_fields_ui([],"#col_tbody","#col_type","#col_name",'#col_create')
+        $("#tsk_create").on("click",async ev=>{
+            var api_url = new URL("api/db/task/create", window.location.origin);
+            var post_data = {}
+            post_data.display_name = $('#tname').val()
+            post_data.description = $('#tdesc').val()
+            post_data.upload_cycle = $('#uploadcycle').val()
+            post_data.pass_criterion = $('#passcriterion').val()
+            post_data.activated = false
+            post_data.columns = get_cols()
+            var res = await fetch_json_post(api_url, post_data);
+            if(res.success)
+                location.href = "/tskmgmt/"+res.table_name
+            else
+                validation_failed(res.errs)
+        })
+    })
+</script>
+{% endblock script%}

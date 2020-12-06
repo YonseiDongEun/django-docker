@@ -1,0 +1,17 @@
+{% extends "app/general/base.html" %}
+{% block title %}User Detail{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<h1>Details of {{usr_id}}</h1>
+{% include "app/general/queryui.html" with txt_sql="txt_sql" btn_execute="btn_execute" result_table="result_table" alert_failed="alert_failed" %}
+{% endblock content %}
+{% block script %}
+<script src="{% static '/app/js/db_util.js' %}"></script>
+<script>
+$(function(){
+    setup_query_ui( "api/db/user/{{usr_id}}", "#result_table", "#alert_failed", "#btn_execute", "#txt_sql")
+});
+</script>
+{% endblock script %}

@@ -15,7 +15,7 @@ class UploadFileForm(forms.Form):
 @transaction.atomic
 def upload(request):
     if not request.user.is_authenticated:
-        return redirect('/login')
+        return redirect('/signin')
 
     form = UploadFileForm(request.POST, request.FILES)
     if request.method == 'POST':

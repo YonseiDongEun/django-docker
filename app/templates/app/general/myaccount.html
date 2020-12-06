@@ -1,0 +1,78 @@
+{% extends "app/general/base.html" %}
+
+{% load static %}
+
+{% block title %}My Account{% endblock title %}
+
+{% block content %}
+<div class ='center-col'>
+    <h1>Change Account Info</h1>
+    <form id='submit_form'>
+        {% csrf_token %}
+        <div class="form-group">
+            {% include "app/general/forminput.html" with input_value=user.user_id input_label="ID" input_name="user_id" input_width=5 %}
+            {% include "app/general/forminput.html" with input_label="PW" input_name="pw" input_type="password" input_width=5 %}
+
+        <div class="form-group">
+            {% include "app/general/forminput.html" with input_value=user_.birth input_label="Birth" input_name="birth" input_type="date" input_width=5 %}
+            {% include "app/general/forminput.html" with input_value=user.phone input_label="Phone" input_name="phone" input_type="tel" input_width=5 %}
+            <select id="gender" class="form-control mb-3"> 
+                <option value="M" {% if user.gender == 'M'%} selected {% endif %}>Male</option>
+                <option value="F" {% if user.gender == 'F'%} selected {% endif %}>Female</option>
+            </select>
+            {% include "app/general/forminput.html" with input_value=user.name input_label="Name" input_name="name" input_width=5 %}
+            {% include "app/general/forminput.html" with input_value=user.address input_label="Address" input_name="address" input_width=5 %}
+        </div>
+        <button type="button" class="mb-2 form-control" id='update_info'>Update Info</button>
+    </form>
+    <button type="button" class="form-control btn btn-danger" {% if user.role == 'A' %}disabled=true{% endif %} data-toggle="modal" data-target="#deleteAccountModal">Delete Account</button>
+    <!-- Modal -->
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+            Are you sure you want to delete your account, <b>{{user.name}}?</b>
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-danger" id ="delete_account_final">Yes</button>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block script %}
+<script src="{% static '/app/js/db_util.js' %}"></script>
+<script>
+    $(async function(){
+
+        $("#update_info").on("click",async function(e){
+            var user_id = $("#user_id").val()
+            var pw = $("#pw").val()
+            var birth = $("#birth").val()
+            var phone = $("#phone").val()
+            var gender = $("#gender").val()
+            var name = $("#name").val()
+            var address = $("#address").val()
+            var post_data={user_id,pw,birth,phone,gender,name,address}
+            var res = await fetch_json_post("/api/db/update_account",post_data);
+            if(res.success)
+                location.href="/"
+            else
+                validation_failed(res.errs)
+        })
+        $("#delete_account_final").on("click",function(){
+            location.href = "delete_account_confirmed";
+        })
+
+
+    })
+</script>
+{% endblock script %}
