@@ -48,6 +48,8 @@ class TaskDescriptor:
         
         self.table_name = dbinterface.get_available_task_table_name(self.table_name)
         self.columns.append({'fieldname':'_submitter_id','fieldtype':'INT'})
+        self.columns.append({'fieldname':'_submitter_name','fieldtype':'TEXT'})
+        
         result = dbinterface.create_table(self.table_name, self.columns)
         if(not result):
             return False
@@ -126,8 +128,7 @@ class RawDescriptor:
         return
     
     def is_valid(self):
-        return self.display_name is not None \
-            and 2<len(self.display_name)<15
+        return self.display_name is not None
     
     def table_exists(self):
         return dbinterface.table_exists(self.table_name)
@@ -136,6 +137,7 @@ class RawDescriptor:
         if(not self.is_valid()):
             return False
         self.columns.append({'fieldname':'_submitter_id','fieldtype':'INT'})
+        self.columns.append({'fieldname':'_submitter_name','fieldtype':'TEXT'})
            
         if(self.table_name is None):
             self.table_name = self.display_name

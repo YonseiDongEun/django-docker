@@ -136,7 +136,7 @@ setup_query_ui = function( api_url, tbl_selector, alert_selector, execute_select
 }
 setup_fields_ui = function( columns, tbody_selector, col_type_selector=null, col_name_selector=null, col_create_selector=null, prefix=""){
     var dom_tbody = $(tbody_selector)[0]
-    var valid_identifier_pattern = /^[a-zA-Z_][a-zA-Z_0-9]{0,32}/;
+    var valid_identifier_pattern = /^[a-zA-Z_][a-zA-Z_0-9]{0,32}$/;
     var callback = null;
     if(col_create_selector){
         callback = function(ev){

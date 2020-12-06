@@ -1,6 +1,7 @@
 from .dbinterface import *
 from . import task
 from app import models
+from app.utils import validation
 
 def _get_query_result(request, tablename, pwhere_="TRUE", fields=None, select_=None):
     where_ = pwhere_
@@ -43,12 +44,21 @@ def api_create_task(request):
     result = False
     if(request.body):
         json_data = json.loads(request.body)
-    new_task = task.TaskDescriptor(json_data)
-    if(not new_task.is_valid() or new_task.table_exists()):
-        result= False
-    else:
-        result = new_task.create()
-    return JsonResponse({'success':result, 'table_name':new_task.table_name},safe=False)
+    errs = []
+    res = {'errs':errs}
+    validation.validate(validation.display_name,json_data['display_name'],errs)
+    validation.validate(validation.description,json_data['description'],errs)
+    new_task=None
+    if(len(errs)==0):
+        new_task = task.TaskDescriptor(json_data)
+        if(new_task.table_exists()):
+            result= False
+        else:
+            result = new_task.create()
+            res['table_name'] = new_task.table_name
+    
+    res['success']=result
+    return JsonResponse(res, safe=False)
 
 def api_update_task(request):
     if not account.is_admin(request):
@@ -120,18 +130,25 @@ def api_create_raw_type(request):
     if not account.is_admin(request):
         return userinterface.render_template_error_UI(request,403)
 
+    errs = []
+    res = {'errs':errs}
     json_data=None
     result = False
     if(request.body):
         json_data = json.loads(request.body)
-    new_raw = task.RawDescriptor(json_data)
     
-    if(not new_raw.is_valid() or new_raw.table_exists()):
-        result= False
-    else:
-        result = new_raw.create()
 
-    return JsonResponse({'success':result, 'table_name':new_raw.table_name},safe=False)
+    validation.validate(validation.display_name,json_data['display_name'],errs)
+    new_raw = task.RawDescriptor(json_data)
+    if(len(errs)==0):
+        if(not new_raw.is_valid() or new_raw.table_exists()):
+            result= False
+        else:
+            result = new_raw.create()
+            res['table_name']=new_raw.table_name
+
+    res['success']= result
+    return JsonResponse(res,safe=False)
 
 def api_submitter_pending_status(request, taskname):
     if not account.is_submitter(request):
@@ -159,7 +176,6 @@ def api_submitter_pending_status(request, taskname):
 
 
 def api_submitter_request_permission(request, taskname):
-    print("TEST")
     if not account.is_submitter(request):
         return userinterface.render_template_error_UI(request,403)
     
@@ -185,3 +201,34 @@ def api_submitter_request_permission(request, taskname):
         pass
 
     return JsonResponse({'success':success},safe=False)
+
+def api_update_account(request):
+    errs = []
+    res = {'success':False, 'errs':errs}
+    if(request.body):
+        json_data = json.loads(request.body)
+        res['success'] = account.update_info(request, json_data, errs)
+    return JsonResponse(res,safe=False)
+
+
+def api_create_account(request):
+    errs = []
+    res = {'success':False, 'errs':errs}
+    if(request.body):
+        json_data = json.loads(request.body)
+        res['success'] = account.create_account(request, json_data, errs)
+    if(res['success']):
+        account.signin(request)
+    return JsonResponse(res,safe=False)
+
+def api_signin(request):
+    errs = []
+    res = {'success':False, 'errs':errs}
+    if(request.body):
+        json_data = json.loads(request.body)
+        res['success'] = account.signin(request, json_data)
+    if(res['success']):
+        account.signin(request,json_data)
+    else:
+        res['errs'] = ["sign in failed"]
+    return JsonResponse(res,safe=False)

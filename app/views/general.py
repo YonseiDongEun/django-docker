@@ -26,11 +26,6 @@ def view_signup(request):
     if(request.user.is_authenticated):
         return redirect("/")
 
-    if(request.method=="POST"):
-        if(account.create_account(request)):
-            account.signin(request)
-            return redirect("/")
-
     return render_template_UI(request,'app/general/signup.html')
 
 def view_signout(request):
@@ -44,10 +39,6 @@ def view_signout(request):
 
 def view_myaccount(request):
     if(not request.user.is_authenticated):
-        return redirect("/")
-
-    if(request.method=="POST"):
-        account.update_info(request)
         return redirect("/")
 
     return render_template_UI(request,'app/general/myaccount.html')

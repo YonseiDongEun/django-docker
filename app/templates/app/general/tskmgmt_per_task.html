@@ -108,8 +108,11 @@
             post_data.task_name = "{{table_name}}";
             post_data.columns = get_cols();
             var res = await fetch_json_post(api_url, post_data);
+            console.log(res)
             if(res.success)
                 location.href = ""
+            else
+                validation_failed(res.errs)
         })
         $("#tsk_update").on("click",async ev=>{
             var api_url = new URL("api/db/task/update", window.location.origin);

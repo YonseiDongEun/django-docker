@@ -31,6 +31,9 @@ urlpatterns = [
     path('usrmgmt/<usrid>/', view_usrmgmt_per_user, name='usrmgmt_per_user'),
 
     # api
+    path('api/db/update_account', api_update_account),
+    path('api/db/create_account', api_create_account),
+    path('api/db/signin', api_signin),
     path('api/db/users/',api_get_users, name='api_db_users'),
     path('api/db/tasks/',api_get_tasks, name='api_db_tasks'),
     path('api/db/task/create',api_create_task, name='api_db_create_task'),

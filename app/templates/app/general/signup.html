@@ -1,16 +1,17 @@
 {% extends "app/general/base.html" %}
 {% block title %}Sign up{% endblock title %}
 
+{% load static %}
 {% block content %}
     <div class='center-col'>
         <h1>Sign Up</h1>
 
-        <form method="POST" action="{% url 'app:signup' %}">
+        <form>
             {% csrf_token %}
             <div class="form-group">
-                {% include "app/general/forminput.html" with input_label="ID" input_name="id" input_width=5 %}
+                {% include "app/general/forminput.html" with input_label="ID" input_name="user_id" input_width=5 %}
                 {% include "app/general/forminput.html" with input_label="PW" input_name="pw" input_type="password" input_width=5 %}
-                <select name="role"class="form-control">
+                <select id="role"class="form-control">
                     <option value="submitter">Submitter</option>
                     <option value="evaluator">Evaluator</option>
                 </select>
@@ -19,14 +20,39 @@
             <div class="form-group">
                 {% include "app/general/forminput.html" with input_label="Birth" input_name="birth" input_type="date" input_width=5 %}
                 {% include "app/general/forminput.html" with input_label="Phone" input_name="phone" input_type="tel" input_width=5 %}
-                <select name="gender"class="form-control">
+                <select id="gender"class="form-control">
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                 </select>
                 {% include "app/general/forminput.html" with input_label="Name" input_name="name" input_width=5 %}
                 {% include "app/general/forminput.html" with input_label="Address" input_name="address" input_width=5 %}
             </div>
-            <input type="submit" value="Sign Up" class="form-control">
+            <button type="button" class="form-control" id='signup'>Sign Up</button>
         </form>
     </div>
 {% endblock content %}
+{% block script %}
+<script src="{% static '/app/js/db_util.js' %}"></script>
+<script>
+    $(async function(){
+
+        $("#signup").on("click",async function(e){
+            var user_id = $("#user_id").val()
+            var pw = $("#pw").val()
+            var birth = $("#birth").val()
+            var phone = $("#phone").val()
+            var gender = $("#gender").val()
+            var role = $("#role").val()
+            var name = $("#name").val()
+            var address = $("#address").val()
+            var post_data={user_id,pw,role,birth,phone,gender,name,address}
+            var res = await fetch_json_post("/api/db/create_account",post_data);
+            console.log(res)
+            if(res.success)
+                location.href="/"
+            else
+                validation_failed(res.errs)
+        })
+    })
+</script>
+{% endblock script %}

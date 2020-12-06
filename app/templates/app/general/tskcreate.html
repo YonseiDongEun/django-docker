@@ -37,6 +37,8 @@
             var res = await fetch_json_post(api_url, post_data);
             if(res.success)
                 location.href = "/tskmgmt/"+res.table_name
+            else
+                validation_failed(res.errs)
         })
     })
 </script>

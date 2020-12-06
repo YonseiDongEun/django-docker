@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import authenticate, login, logout
 from django.utils import dateparse
 from app.models import User
+from app.utils import validation
 
 class SignupForm(forms.Form):
     user_id = forms.CharField(min_length=2, max_length=15)
@@ -13,44 +14,38 @@ class SignupForm(forms.Form):
     role = forms.CharField(max_length=1)
 
 
-def create_account(request):
-    id_ = request.POST['id']
-    pw_ = request.POST['pw']
-    role_=request.POST['role']
-    birth_ = request.POST['birth']
-    phone_ = request.POST['phone']
-    gender_ = request.POST['gender']
-    name_ = request.POST['name']
-    address_ = request.POST['address']
+def create_account(request,data,errs):
+        
+    data['birth'] = dateparse.parse_date(data['birth'])
+    validation.validate(validation.user_id,data['user_id'],errs)
+    validation.validate(validation.birth,data['birth'],errs)
+    validation.validate(validation.phone,data['phone'],errs)
+    validation.validate(validation.name,data['name'],errs)
+    validation.validate(validation.address,data['address'],errs)
+    validation.validate(validation.password_init,data['pw'],errs)
 
-    if(not(2<=len(str(id_))<=15)):
-        return False
-    if(not(2<=len(str(pw_))<=15)):
+    if(len(errs)>0):
         return False
 
-    role_ = get_role_constant(role_)
-    if(role_ is None):
+    data['role'] = get_role_constant(data['role'])
+    if(data['role'] is None):
         return False
     
-    gender_ = get_gender_const(gender_)
-    if(gender_ is None):
+    data['gender'] = get_gender_const(data['gender'])
+    if(data['gender'] is None):
         return False
     
-    birth_ = dateparse.parse_date(birth_)
-    if(birth_ is None):
-        pass
-
     try:
-        r=User.objects.create(user_id=id_,name=name_,address=address_,gender=gender_,phone=phone_,birth=birth_,role=role_)
-        r.set_password(pw_)
+        r=User.objects.create(user_id=data['user_id'],name=data['name'],address=data['address'],gender=data['gender'],phone=data['phone'],birth=data['birth'],role=data['role'])
+        r.set_password(data['pw'])
         r.save()
         return True
     except:
         return False
 
-def signin(request):
-    id = request.POST['id']
-    pw = request.POST['pw']
+def signin(request,data):
+    id = data['user_id']
+    pw = data['pw']
     user = authenticate(request, username=id,password=pw)
     if( user is None):
         return False
@@ -73,20 +68,28 @@ def delete_account(request):
     u.delete()
     return True
     
-def update_info(request):
+def update_info(request, data, errs):
     u = get_user(request)
-    form = request.POST
-
+    
+    data['birth'] = dateparse.parse_date(data['birth'])
+    validation.validate(validation.user_id,data['user_id'],errs)
+    validation.validate(validation.birth,data['birth'],errs)
+    validation.validate(validation.phone,data['phone'],errs)
+    validation.validate(validation.name,data['name'],errs)
+    validation.validate(validation.address,data['address'],errs)
+    validation.validate(validation.password,data['pw'],errs)
+    if(len(errs)>0):
+        return False
     try:
-        u.user_id=form['id']
-        u.birth = dateparse.parse_date(form['birth'])
-        u.phone = form['phone']
-        u.gender = get_gender_const(form['gender']) or User.Gender.MALE
-        u.name = form['name']
-        u.address = form['address']
+        u.user_id=data['user_id']
+        u.birth = data['birth']
+        u.phone = data['phone']
+        u.gender = get_gender_const(data['gender']) or User.Gender.MALE
+        u.name = data['name']
+        u.address = data['address']
 
-        if(2<=len(str(form['pw']))<=15):
-            u.set_password(form['pw'])
+        if(data['pw']!=''):
+            u.set_password(data['pw'])
         u.save()
         request.session['user_id'] = str(u.user_id)
         return True
