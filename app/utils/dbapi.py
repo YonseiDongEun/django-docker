@@ -93,6 +93,15 @@ def api_get_pending_data(request,taskname):
     models.TaskMetadata.objects.get(table_name=taskname)
     return _get_query_result(request,taskname+"_wait")
 
+def api_get_raw_data(request,taskname,rawname):
+    if not account.is_admin(request):
+        return userinterface.render_template_error_UI(request,403)
+
+    print("_"*32)
+    print(rawname)
+    models.RawFileMetadata.objects.get(table_name=rawname)
+    return _get_query_result(request,rawname)
+
 def api_get_pending_submitters(request,taskname):
     if not account.is_admin(request):
         return userinterface.render_template_error_UI(request,403)

@@ -33,7 +33,7 @@
         setup_query_ui( "api/db/task/{{taskname}}/task_accepted", "#result_table", "#alert_failed", "#btn_execute", "#txt_sql")
         setup_query_ui( "api/db/task/{{taskname}}/task_pending", "#result_table_pd", "#alert_failed_pd", "#btn_execute_pd", "#txt_sql_pd")
         {% for raw in raws %}
-        setup_query_ui( "api/db/task/{{taskname}}/task_pending", "#result_table_{{raw.table_name}}", "#alert_failed_{{raw.table_name}}", "#btn_execute_{{raw.table_name}}", "#txt_sql_{{raw.table_name}}")
+        setup_query_ui( "api/db/task/{{taskname}}/raw/{{raw.table_name}}", "#result_table_{{raw.table_name}}", "#alert_failed_{{raw.table_name}}", "#btn_execute_{{raw.table_name}}", "#txt_sql_{{raw.table_name}}")
         {% endfor %}
     })
 </script>
