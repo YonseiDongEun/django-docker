@@ -21,9 +21,9 @@ def api_get_users(request):
     if not account.is_admin(request):
         return userinterface.render_template_error_UI(request,403)
 
-    fields = to_fields(["user_id","name","role","gender","phone","birth","user_address","age",'status','task_name'])
-    tablename = "USER left join PARTICIPATES_IN as pin on id=pin.uid left join TASK_METADATA as tmd on pin.table_name=tmd.table_name"
-    select_="*,cast(datediff(now(),birth)/365 as signed) as age, tmd.display_name as task_name"
+    fields = to_fields(["user_id","name","role","gender","phone","birth","user_address","age",'status','task_table'])
+    tablename = "VIEW_USER"
+    select_="*"
     return _get_query_result(request,tablename,fields=fields,select_=select_)
 
 def api_get_tasks(request):
@@ -253,15 +253,15 @@ def api_get_user_detail(request,usr_id):
     where_=f"user_id='{usr_id}'"
     if(usr.role==models.User.UserType.ADMIN):
         fields = to_fields(["user_id","name","role","gender","phone","birth","user_address","age"])
-        tablename = "USER"
-        select_="*,cast(datediff(now(),birth)/365 as signed) as age"
+        tablename = "VIEW_USER"
+        select_="*"
     elif(usr.role==models.User.UserType.EVALUATOR):
         fields = to_fields(["user_id","name","role","gender","phone","birth","user_address","age",'submission_id'])
-        tablename = "USER left join IS_ASSIGNED_TO as iat on id=iat.uid"
-        select_="*,cast(datediff(now(),birth)/365 as signed) as age, iat.pds_id as submission_id"
+        tablename = "VIEW_USER left join IS_ASSIGNED_TO as iat on id=iat.uid"
+        select_="*, iat.pds_id as submission_id"
     elif(usr.role==models.User.UserType.SUBMITTER):
-        fields = to_fields(["user_id","name","role","gender","phone","birth","user_address","age","task_name","status"])
-        tablename = "USER left join PARTICIPATES_IN as pin on id=pin.uid left join TASK_METADATA as tmd on pin.table_name=tmd.table_name"
-        select_="*,cast(datediff(now(),birth)/365 as signed) as age, tmd.display_name as task_name"
+        fields = to_fields(["user_id","name","role","gender","phone","birth","user_address","age","task_table","status"])
+        tablename = "VIEW_USER left join PARTICIPATES_IN as pin on id=pin.uid"
+        select_="*"
 
     return _get_query_result(request,tablename,pwhere_=where_, fields=fields,select_=select_)

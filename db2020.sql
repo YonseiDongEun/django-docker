@@ -154,6 +154,4 @@ FOREIGN KEY(UID) REFERENCES USER_EVALUATOR(ID)
 FOREIGN KEY(PDS_ID) REFERENCES PARSING_DATA_SEQ(PDS_ID)
 );
 
-
-
-
+create view VIEW_USER as SELECT user_id,id,name,role,gender,phone,birth,user_address,cast(datediff(now(),birth)/365 as signed) as age, tmd.display_name as task_table,status FROM USER left join PARTICIPATES_IN as pin on id=pin.uid left join TASK_METADATA as tmd on pin.table_name=tmd.table_name WHERE TRUE;

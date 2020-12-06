@@ -48,7 +48,7 @@ _help_text={
     """WHERE 절을 입력하여 역할,나이대,성별,참여중인 태스크, ID를 기준으로 회원을 검색합니다.
     검색 결과를 다운받을 수 있습니다.
     사용자를 클릭하여 자세히 볼 수 있습니다.
-    task_name: 해당 제출자가 관련된 task입니다.
+    task_table: 해당 제출자가 관련된 task입니다.
     status: 제출자와 해당 task간의 상태입니다. a:approved, 참여 가능 / p:pending, 허가 대기 / r:rejected, 참여 거부됨
     """,
     "tskstat":
