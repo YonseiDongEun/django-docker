@@ -22,7 +22,7 @@ def api_get_users(request):
         return userinterface.render_template_error_UI(request,403)
 
     fields = to_fields(["user_id","name","role","gender","phone","birth","user_address","age",'status','task_name'])
-    tablename = "USER left join participates_in as pin on id=pin.uid left join task_metadata as tmd on pin.table_name=tmd.table_name"
+    tablename = "USER left join PARTICIPATES_IN as pin on id=pin.uid left join TASK_METADATA as tmd on pin.table_name=tmd.table_name"
     select_="*,cast(datediff(now(),birth)/365 as signed) as age, tmd.display_name as task_name"
     return _get_query_result(request,tablename,fields=fields,select_=select_)
 
