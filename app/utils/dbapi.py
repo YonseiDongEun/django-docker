@@ -210,7 +210,6 @@ def api_update_account(request):
         res['success'] = account.update_info(request, json_data, errs)
     return JsonResponse(res,safe=False)
 
-
 def api_create_account(request):
     errs = []
     res = {'success':False, 'errs':errs}
@@ -232,3 +231,27 @@ def api_signin(request):
     else:
         res['errs'] = ["sign in failed"]
     return JsonResponse(res,safe=False)
+
+def api_get_user_detail(request,usr_id):
+    if not account.is_admin(request):
+        return userinterface.render_template_error_UI(request,403)
+
+    usr = models.User.objects.get(user_id=usr_id)
+    fields = None
+    select_ = None
+    tablename = None
+    where_=f"user_id='{usr_id}'"
+    if(usr.role==models.User.UserType.ADMIN):
+        fields = to_fields(["user_id","name","role","gender","phone","birth","user_address","age"])
+        tablename = "USER"
+        select_="*,cast(datediff(now(),birth)/365 as signed) as age"
+    elif(usr.role==models.User.UserType.EVALUATOR):
+        fields = to_fields(["user_id","name","role","gender","phone","birth","user_address","age",'submission_id'])
+        tablename = "USER left join is_assigned_to as iat on id=iat.uid"
+        select_="*,cast(datediff(now(),birth)/365 as signed) as age, iat.pds_id as submission_id"
+    elif(usr.role==models.User.UserType.SUBMITTER):
+        fields = to_fields(["user_id","name","role","gender","phone","birth","user_address","age","task_name","status"])
+        tablename = "USER left join participates_in as pin on id=pin.uid left join task_metadata as tmd on pin.table_name=tmd.table_name"
+        select_="*,cast(datediff(now(),birth)/365 as signed) as age, tmd.display_name as task_name"
+
+    return _get_query_result(request,tablename,pwhere_=where_, fields=fields,select_=select_)

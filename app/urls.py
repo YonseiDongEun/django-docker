@@ -35,6 +35,7 @@ urlpatterns = [
     path('api/db/create_account', api_create_account),
     path('api/db/signin', api_signin),
     path('api/db/users/',api_get_users, name='api_db_users'),
+    path('api/db/user/<usr_id>',api_get_user_detail),
     path('api/db/tasks/',api_get_tasks, name='api_db_tasks'),
     path('api/db/task/create',api_create_task, name='api_db_create_task'),
     path('api/db/task/update',api_update_task, name='api_db_update_task'),

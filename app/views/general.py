@@ -94,7 +94,7 @@ def view_usrmgmt(request):
 def view_usrmgmt_per_user(request, usrid):
     if(not account.is_admin(request)):
         return redirect("/")
-    return render_template_UI(request,'app/general/todo.html')
+    return render_template_UI(request,'app/general/usrmgmt_per_user.html',{"usr_id":usrid})
 
 # submitter
 def view_tsklist_submitter(request):

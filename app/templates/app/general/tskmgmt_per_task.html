@@ -23,7 +23,7 @@
             </div>
             <button type="button" class="form-control" id='tsk_update'>Update Task</button>
         </form>
-        <h1 class="split">Pending Sumbitters:</h1>
+        <h1 class="split">Pending Submitters:</h1>
         {% include "app/general/queryui.html" with txt_sql="txt_sql_sb" btn_execute="btn_execute_sb" result_table="result_table_sb" alert_failed="alert_failed_sb" %}
         <h1 class="split">Available Raw Data Types:</h1>
         {% include "app/general/queryui.html" with txt_sql="txt_sql" btn_execute="btn_execute" result_table="result_table" alert_failed="alert_failed" %}
