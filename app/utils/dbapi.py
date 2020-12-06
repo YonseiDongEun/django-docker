@@ -257,7 +257,7 @@ def api_get_user_detail(request,usr_id):
         select_="*,cast(datediff(now(),birth)/365 as signed) as age"
     elif(usr.role==models.User.UserType.EVALUATOR):
         fields = to_fields(["user_id","name","role","gender","phone","birth","user_address","age",'submission_id'])
-        tablename = "USER left join is_assigned_to as iat on id=iat.uid"
+        tablename = "USER left join IS_ASSIGNED_TO as iat on id=iat.uid"
         select_="*,cast(datediff(now(),birth)/365 as signed) as age, iat.pds_id as submission_id"
     elif(usr.role==models.User.UserType.SUBMITTER):
         fields = to_fields(["user_id","name","role","gender","phone","birth","user_address","age","task_name","status"])
