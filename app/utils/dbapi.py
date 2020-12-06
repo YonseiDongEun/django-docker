@@ -107,7 +107,7 @@ def api_get_pending_submitters(request,taskname):
         return userinterface.render_template_error_UI(request,403)
 
     tablename = "PARTICIPATES_IN, USER"
-    where_="uid=id and status='p'"
+    where_=f"uid=id and status='p' and table_name='{taskname}'"
     fields = to_fields(['user_id','name','birth','phone','gender','user_address'])
     return _get_query_result(request,tablename,where_,fields)
 
